@@ -1,6 +1,7 @@
 import json
 import html
 import time
+import math
 
 import altair as alt
 import pandas as pd
@@ -82,13 +83,9 @@ if not st.session_state.logged_in:
         unsafe_allow_html=True
     )
 
-    with st.container(
-        border=True
-    ):
+    with st.container(border=True):
 
-        with st.form(
-            "login_form"
-        ):
+        with st.form("login_form"):
 
             username = st.text_input(
                 "Username"
@@ -144,7 +141,7 @@ st.markdown(
 
 
     /* =====================================================
-       TITLE
+       PAGE TITLE
        ===================================================== */
 
     .main-title {
@@ -218,17 +215,28 @@ st.markdown(
         padding: 14px;
         min-height: 105px;
         background: rgba(128, 128, 128, 0.035);
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        text-align: center;
     }
 
     .metric-label {
+        width: 100%;
         font-size: 0.78rem;
         color: #666;
         margin-bottom: 6px;
+        text-align: center;
     }
 
     .metric-value {
+        width: 100%;
         font-size: 1.55rem;
         font-weight: 600;
+        text-align: center;
     }
 
 
@@ -243,10 +251,11 @@ st.markdown(
         border-radius: 20px;
         font-size: 0.68rem;
         font-weight: 700;
+        text-align: center;
     }
 
 
-    /* NORMAL = GREEN */
+    /* NORMAL */
 
     .sensor-normal {
         background-color: rgba(46, 160, 67, 0.14);
@@ -255,7 +264,7 @@ st.markdown(
     }
 
 
-    /* LOW = YELLOW */
+    /* LOW */
 
     .sensor-low {
         background-color: rgba(245, 158, 11, 0.16);
@@ -264,7 +273,7 @@ st.markdown(
     }
 
 
-    /* HIGH = RED */
+    /* HIGH */
 
     .sensor-high {
         background-color: rgba(220, 53, 69, 0.14);
@@ -290,7 +299,8 @@ st.markdown(
         border-radius: 9px;
         padding: 12px 14px;
         font-size: 0.82rem;
-        font-weight: 500;
+        font-weight: 600;
+        text-align: center;
     }
 
     .status-online {
@@ -330,8 +340,8 @@ st.markdown(
         text-align: right;
         font-size: 0.78rem;
         color: #777;
-        margin-top: 4px;
-        margin-bottom: 5px;
+        margin-top: 3px;
+        margin-bottom: 4px;
     }
 
     .countdown-value {
@@ -341,7 +351,7 @@ st.markdown(
 
 
     /* =====================================================
-       CHART TITLE
+       CHART
        ===================================================== */
 
     .chart-title {
@@ -349,6 +359,15 @@ st.markdown(
         font-weight: 600;
         margin-top: 0.5rem;
         margin-bottom: 0.3rem;
+    }
+
+
+    /* =====================================================
+       STREAMLIT DATAFRAME
+       ===================================================== */
+
+    div[data-testid="stDataFrame"] {
+        text-align: center;
     }
 
 
@@ -525,13 +544,9 @@ def get_container_client():
 # READ BLOB RECORDS
 # =========================================================
 
-def read_blob_records(
-    blobs
-):
+def read_blob_records(blobs):
 
-    container_client = (
-        get_container_client()
-    )
+    container_client = get_container_client()
 
     records = []
 
@@ -569,12 +584,10 @@ def read_blob_records(
 
                 try:
 
-                    record = json.loads(
-                        line
-                    )
-
                     records.append(
-                        record
+                        json.loads(
+                            line
+                        )
                     )
 
                 except json.JSONDecodeError:
@@ -594,9 +607,7 @@ def read_blob_records(
 # PREPARE DATAFRAME
 # =========================================================
 
-def prepare_dataframe(
-    records
-):
+def prepare_dataframe(records):
 
     if len(records) == 0:
 
@@ -641,10 +652,7 @@ def prepare_dataframe(
 
 
     # =====================================================
-    # AZURE FIELD
-    #
-    # Do NOT fake an Azure connection status.
-    # If ESP32 does not send this field yet, show N/A.
+    # AZURE HISTORICAL FIELD
     # =====================================================
 
     if "azure" not in df.columns:
@@ -699,9 +707,7 @@ def prepare_dataframe(
 
 def load_recent_data():
 
-    container_client = (
-        get_container_client()
-    )
+    container_client = get_container_client()
 
 
     blobs = list(
@@ -721,9 +727,7 @@ def load_recent_data():
     )
 
 
-    recent_blobs = blobs[
-        :20
-    ]
+    recent_blobs = blobs[:20]
 
 
     records = read_blob_records(
@@ -746,9 +750,7 @@ def load_recent_data():
 )
 def load_all_data():
 
-    container_client = (
-        get_container_client()
-    )
+    container_client = get_container_client()
 
 
     blobs = list(
@@ -793,9 +795,7 @@ def display_value(
 
     try:
 
-        if pd.isna(
-            value
-        ):
+        if pd.isna(value):
 
             return "N/A"
 
@@ -814,9 +814,7 @@ def display_value(
 # STATUS VALUE
 # =========================================================
 
-def status_value(
-    value
-):
+def status_value(value):
 
     if value is None:
 
@@ -825,9 +823,7 @@ def status_value(
 
     try:
 
-        if pd.isna(
-            value
-        ):
+        if pd.isna(value):
 
             return "UNKNOWN"
 
@@ -845,9 +841,7 @@ def status_value(
 # SAFE HTML
 # =========================================================
 
-def safe_text(
-    value
-):
+def safe_text(value):
 
     return html.escape(
         str(value)
@@ -862,11 +856,6 @@ def sensor_status(
     value,
     sensor_name
 ):
-
-    if value is None:
-
-        return "UNKNOWN"
-
 
     try:
 
@@ -892,9 +881,7 @@ def sensor_status(
         return "UNKNOWN"
 
 
-    if value < limits[
-        "low"
-    ]:
+    if value < limits["low"]:
 
         return "LOW"
 
@@ -904,19 +891,14 @@ def sensor_status(
         "greenhouse_temperature"
     ]:
 
-        if value >= limits[
-            "high"
-        ]:
+        if value >= limits["high"]:
 
             return "HIGH"
 
-    else:
 
-        if value > limits[
-            "high"
-        ]:
+    elif value > limits["high"]:
 
-            return "HIGH"
+        return "HIGH"
 
 
     return "NORMAL"
@@ -926,9 +908,7 @@ def sensor_status(
 # SENSOR STATUS CLASS
 # =========================================================
 
-def sensor_status_class(
-    status
-):
+def sensor_status_class(status):
 
     status = status_value(
         status
@@ -973,10 +953,8 @@ def metric_card(
         )
 
 
-        status_class = (
-            sensor_status_class(
-                status_text
-            )
+        status_class = sensor_status_class(
+            status_text
         )
 
 
@@ -995,14 +973,10 @@ def metric_card(
     return (
         '<div class="metric-card">'
         '<div class="metric-label">'
-        + safe_text(
-            label
-        )
+        + safe_text(label)
         + '</div>'
         '<div class="metric-value">'
-        + safe_text(
-            value
-        )
+        + safe_text(value)
         + '</div>'
         + status_html
         + '</div>'
@@ -1024,13 +998,11 @@ def metric_grid(
             "dashboard-grid-2"
         )
 
-
     elif columns == 3:
 
         grid_class = (
             "dashboard-grid-3"
         )
-
 
     else:
 
@@ -1043,9 +1015,7 @@ def metric_grid(
         '<div class="'
         + grid_class
         + '">'
-        + "".join(
-            cards
-        )
+        + "".join(cards)
         + "</div>"
     )
 
@@ -1068,11 +1038,9 @@ def sensor_chart(
 ):
 
     if (
-        "timestamp"
-        not in df.columns
+        "timestamp" not in df.columns
         or
-        sensor_name
-        not in df.columns
+        sensor_name not in df.columns
     ):
 
         return
@@ -1177,15 +1145,13 @@ def sensor_chart(
 
 
     # =====================================================
-    # LOW LINE
+    # LOW THRESHOLD
     # =====================================================
 
     low_df = pd.DataFrame(
         {
             "threshold": [
-                limits[
-                    "low"
-                ]
+                limits["low"]
             ]
         }
     )
@@ -1215,15 +1181,13 @@ def sensor_chart(
 
 
     # =====================================================
-    # HIGH LINE
+    # HIGH THRESHOLD
     # =====================================================
 
     high_df = pd.DataFrame(
         {
             "threshold": [
-                limits[
-                    "high"
-                ]
+                limits["high"]
             ]
         }
     )
@@ -1259,17 +1223,13 @@ def sensor_chart(
     low_label_df = pd.DataFrame(
         {
             "threshold": [
-                limits[
-                    "low"
-                ]
+                limits["low"]
             ],
 
             "label": [
                 "LOW: "
                 + str(
-                    limits[
-                        "low"
-                    ]
+                    limits["low"]
                 )
                 + unit
             ]
@@ -1308,17 +1268,13 @@ def sensor_chart(
     high_label_df = pd.DataFrame(
         {
             "threshold": [
-                limits[
-                    "high"
-                ]
+                limits["high"]
             ],
 
             "label": [
                 "HIGH: "
                 + str(
-                    limits[
-                        "high"
-                    ]
+                    limits["high"]
                 )
                 + unit
             ]
@@ -1368,7 +1324,7 @@ def sensor_chart(
 
 
 # =========================================================
-# SIDEBAR MENU
+# SIDEBAR
 # =========================================================
 
 page = st.sidebar.radio(
@@ -1380,10 +1336,6 @@ page = st.sidebar.radio(
 )
 
 
-# =========================================================
-# LOGOUT
-# =========================================================
-
 st.sidebar.divider()
 
 
@@ -1393,11 +1345,12 @@ if st.sidebar.button(
 ):
 
     st.session_state.logged_in = False
+
     st.rerun()
 
 
 # =========================================================
-# PAGE TITLE
+# PAGE HEADER
 # =========================================================
 
 st.markdown(
@@ -1424,35 +1377,84 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # COUNTDOWN INITIAL VALUE
-    # =====================================================
-
-    if (
-        "next_dashboard_refresh"
-        not in st.session_state
-    ):
-
-        st.session_state[
-            "next_dashboard_refresh"
-        ] = (
-            time.time()
-            + REFRESH_SECONDS
-        )
-
-
-    # =====================================================
-    # COUNTDOWN TIMER
+    # SESSION STATE FOR LIVE DATA
     #
-    # Runs every second.
-    # Does NOT connect to Azure every second.
+    # Streamlit checks every second.
+    # Azure is only read every 30 seconds.
+    # =====================================================
+
+    if "live_df" not in st.session_state:
+
+        st.session_state.live_df = None
+
+
+    if "next_dashboard_refresh" not in st.session_state:
+
+        st.session_state.next_dashboard_refresh = 0
+
+
+    # =====================================================
+    # LIVE FRAGMENT
     # =====================================================
 
     @st.fragment(
         run_every="1s"
     )
-    def countdown_timer():
+    def live_dashboard():
 
-        seconds_left = int(
+
+        now = time.time()
+
+
+        # =================================================
+        # READ AZURE ONLY WHEN REQUIRED
+        # =================================================
+
+        if (
+            st.session_state.live_df is None
+            or
+            now
+            >= st.session_state.next_dashboard_refresh
+        ):
+
+            try:
+
+                new_df = load_recent_data()
+
+
+                if not new_df.empty:
+
+                    st.session_state.live_df = (
+                        new_df
+                    )
+
+
+                st.session_state[
+                    "next_dashboard_refresh"
+                ] = (
+                    time.time()
+                    + REFRESH_SECONDS
+                )
+
+
+            except Exception as e:
+
+                st.error(
+                    "Unable to connect to Azure Blob Storage."
+                )
+
+                st.code(
+                    str(e)
+                )
+
+                return
+
+
+        # =================================================
+        # COUNTDOWN
+        # =================================================
+
+        seconds_left = math.ceil(
             st.session_state[
                 "next_dashboard_refresh"
             ]
@@ -1460,85 +1462,36 @@ if page == "Live Dashboard":
         )
 
 
-        if seconds_left < 0:
-
-            seconds_left = 0
-
-
-        if seconds_left == 0:
-
-            countdown_text = (
-                "Updating..."
-            )
-
-        else:
-
-            countdown_text = (
-                str(
-                    seconds_left
-                )
-                + "s"
-            )
+        seconds_left = max(
+            0,
+            seconds_left
+        )
 
 
         st.markdown(
             '<div class="countdown-box">'
             'Next update in: '
             '<span class="countdown-value">'
-            + countdown_text
-            + '</span>'
+            + str(seconds_left)
+            + 's'
+            '</span>'
             '</div>',
             unsafe_allow_html=True
         )
 
 
-    # =====================================================
-    # LIVE DATA
-    #
-    # Azure read every 30 seconds.
-    # =====================================================
-
-    @st.fragment(
-        run_every="30s"
-    )
-    def live_dashboard():
-
-
         # =================================================
-        # RESET COUNTDOWN
+        # GET STORED LIVE DATA
         # =================================================
 
-        st.session_state[
-            "next_dashboard_refresh"
-        ] = (
-            time.time()
-            + REFRESH_SECONDS
-        )
+        df = st.session_state.live_df
 
 
-        # =================================================
-        # LOAD AZURE DATA
-        # =================================================
-
-        try:
-
-            df = load_recent_data()
-
-
-        except Exception as e:
-
-            st.error(
-                "Unable to connect to Azure Blob Storage."
-            )
-
-            st.code(
-                str(e)
-            )
-
-            return
-
-
-        if df.empty:
+        if (
+            df is None
+            or
+            df.empty
+        ):
 
             st.warning(
                 "No greenhouse data found in Azure Blob Storage."
@@ -1547,22 +1500,14 @@ if page == "Live Dashboard":
             return
 
 
-        # =================================================
-        # LATEST RECORD
-        # =================================================
-
-        latest = df.iloc[
-            -1
-        ]
+        latest = df.iloc[-1]
 
 
         # =================================================
-        # RECORD TIMESTAMP
+        # LAST SENSOR RECORD
         # =================================================
 
-        record_text = (
-            "Unknown"
-        )
+        record_text = "Unknown"
 
 
         if "timestamp" in df.columns:
@@ -1695,41 +1640,48 @@ if page == "Live Dashboard":
 
             metric_card(
                 "Fish Tank Level",
+
                 display_value(
                     latest.get(
                         "fish_tank_level"
                     ),
                     "%"
                 ),
+
                 fish_level_status
             ),
 
 
             metric_card(
                 "Fish Temperature",
+
                 display_value(
                     latest.get(
                         "fish_temperature"
                     ),
                     " °C"
                 ),
+
                 fish_temperature_status
             ),
 
 
             metric_card(
                 "pH",
+
                 display_value(
                     latest.get(
                         "ph"
                     )
                 ),
+
                 ph_status
             ),
 
 
             metric_card(
                 "Fish Refill Pump",
+
                 status_value(
                     latest.get(
                         "fish_refill_pump"
@@ -1765,30 +1717,35 @@ if page == "Live Dashboard":
 
             metric_card(
                 "Temperature",
+
                 display_value(
                     latest.get(
                         "greenhouse_temperature"
                     ),
                     " °C"
                 ),
+
                 greenhouse_temperature_status
             ),
 
 
             metric_card(
                 "Soil Moisture",
+
                 display_value(
                     latest.get(
                         "soil_moisture"
                     ),
                     "%"
                 ),
+
                 soil_moisture_status
             ),
 
 
             metric_card(
                 "Greenhouse Pump",
+
                 status_value(
                     latest.get(
                         "greenhouse_pump"
@@ -1799,6 +1756,7 @@ if page == "Live Dashboard":
 
             metric_card(
                 "Fan",
+
                 status_value(
                     latest.get(
                         "fan"
@@ -1834,24 +1792,28 @@ if page == "Live Dashboard":
 
             metric_card(
                 "Water Tank 1",
+
                 display_value(
                     latest.get(
                         "water_tank_1_level"
                     ),
                     "%"
                 ),
+
                 tank1_status
             ),
 
 
             metric_card(
                 "Water Tank 2",
+
                 display_value(
                     latest.get(
                         "water_tank_2_level"
                     ),
                     "%"
                 ),
+
                 tank2_status
             )
 
@@ -1907,12 +1869,10 @@ if page == "Live Dashboard":
             '<div class="'
             + wifi_class
             + '">'
-
             'Wi-Fi: '
             + safe_text(
                 wifi_status
             )
-
             + '</div>'
 
 
@@ -2063,12 +2023,6 @@ if page == "Live Dashboard":
         )
 
 
-    # =====================================================
-    # RUN LIVE COMPONENTS
-    # =====================================================
-
-    countdown_timer()
-
     live_dashboard()
 
 
@@ -2104,6 +2058,7 @@ elif page == "Historical Data":
     ):
 
         st.cache_data.clear()
+
         st.rerun()
 
 
@@ -2117,9 +2072,7 @@ elif page == "Historical Data":
             "Loading historical data from Azure..."
         ):
 
-            history_df = (
-                load_all_data()
-            )
+            history_df = load_all_data()
 
 
     except Exception as e:
@@ -2219,9 +2172,7 @@ elif page == "Historical Data":
     st.divider()
 
 
-    filtered_df = (
-        history_df.copy()
-    )
+    filtered_df = history_df.copy()
 
 
     if (
@@ -2308,53 +2259,33 @@ elif page == "Historical Data":
     #
     # ORDER:
     #
-    # 1. Timestamp
-    # 2. Greenhouse
-    # 3. Fish / Aquaponics
-    # 4. Water Tanks
-    # 5. Connection
+    # GREENHOUSE
+    # FISH
+    # WATER
+    # CONNECTION
     # =====================================================
 
     preferred_columns = [
 
-        # -------------------------------------------------
-        # TIME
-        # -------------------------------------------------
-
+        # Time
         "timestamp",
 
-
-        # -------------------------------------------------
-        # GREENHOUSE
-        # -------------------------------------------------
-
+        # Greenhouse
         "greenhouse_temperature",
         "soil_moisture",
         "fan",
         "greenhouse_pump",
 
-
-        # -------------------------------------------------
-        # FISH / AQUAPONICS
-        # -------------------------------------------------
-
+        # Fish
         "fish_tank_level",
         "ph",
         "fish_refill_pump",
 
-
-        # -------------------------------------------------
-        # WATER TANKS
-        # -------------------------------------------------
-
+        # Water
         "water_tank_1_level",
         "water_tank_2_level",
 
-
-        # -------------------------------------------------
-        # CONNECTION
-        # -------------------------------------------------
-
+        # Connection
         "wifi",
         "azure"
 
@@ -2416,17 +2347,8 @@ elif page == "Historical Data":
     table_df = table_df.rename(
         columns={
 
-            # ---------------------------------------------
-            # TIME
-            # ---------------------------------------------
-
             "timestamp":
                 "Timestamp",
-
-
-            # ---------------------------------------------
-            # GREENHOUSE
-            # ---------------------------------------------
 
             "greenhouse_temperature":
                 "GH Temp",
@@ -2440,11 +2362,6 @@ elif page == "Historical Data":
             "greenhouse_pump":
                 "GH Pump",
 
-
-            # ---------------------------------------------
-            # FISH
-            # ---------------------------------------------
-
             "fish_tank_level":
                 "Fish Tank",
 
@@ -2454,21 +2371,11 @@ elif page == "Historical Data":
             "fish_refill_pump":
                 "Refill Pump",
 
-
-            # ---------------------------------------------
-            # WATER
-            # ---------------------------------------------
-
             "water_tank_1_level":
                 "Tank 1",
 
             "water_tank_2_level":
                 "Tank 2",
-
-
-            # ---------------------------------------------
-            # CONNECTION
-            # ---------------------------------------------
 
             "wifi":
                 "Wi-Fi",
@@ -2496,11 +2403,55 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # HISTORICAL TABLE
+    # CENTRE HISTORICAL TABLE
     # =====================================================
 
+    centered_table = (
+
+        table_df.style
+
+        .set_properties(
+            **{
+                "text-align":
+                    "center"
+            }
+        )
+
+        .set_table_styles(
+            [
+
+                {
+                    "selector":
+                        "th",
+
+                    "props": [
+                        (
+                            "text-align",
+                            "center"
+                        )
+                    ]
+                },
+
+                {
+                    "selector":
+                        "td",
+
+                    "props": [
+                        (
+                            "text-align",
+                            "center"
+                        )
+                    ]
+                }
+
+            ]
+        )
+
+    )
+
+
     st.dataframe(
-        table_df,
+        centered_table,
         use_container_width=True,
         hide_index=True
     )

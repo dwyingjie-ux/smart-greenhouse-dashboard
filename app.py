@@ -4,6 +4,7 @@ import html
 import altair as alt
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from azure.storage.blob import BlobServiceClient
 
 
@@ -19,24 +20,16 @@ st.set_page_config(
 
 
 # =========================================================
-# LOGIN DETAILS
+# LOGIN
 # =========================================================
 
 LOGIN_USERNAME = "admin"
 LOGIN_PASSWORD = "admin"
 
 
-# =========================================================
-# LOGIN SESSION
-# =========================================================
-
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-
-# =========================================================
-# LOGIN PAGE
-# =========================================================
 
 if not st.session_state.logged_in:
 
@@ -81,9 +74,13 @@ if not st.session_state.logged_in:
         unsafe_allow_html=True
     )
 
-    with st.container(border=True):
+    with st.container(
+        border=True
+    ):
 
-        with st.form("login_form"):
+        with st.form(
+            "login_form"
+        ):
 
             username = st.text_input(
                 "Username"
@@ -120,16 +117,12 @@ if not st.session_state.logged_in:
 
 
 # =========================================================
-# DASHBOARD CSS
+# CSS
 # =========================================================
 
 st.markdown(
     """
     <style>
-
-    /* =====================================================
-       MAIN PAGE
-       ===================================================== */
 
     .block-container {
         padding-top: 1.8rem;
@@ -163,7 +156,7 @@ st.markdown(
 
 
     /* =====================================================
-       SECTION TITLE
+       SECTION
        ===================================================== */
 
     .section-title {
@@ -175,7 +168,7 @@ st.markdown(
 
 
     /* =====================================================
-       DASHBOARD GRIDS
+       GRID
        ===================================================== */
 
     .dashboard-grid {
@@ -208,11 +201,11 @@ st.markdown(
        ===================================================== */
 
     .metric-card {
-        border: 1px solid rgba(128, 128, 128, 0.20);
+        border: 1px solid rgba(128,128,128,0.20);
         border-radius: 10px;
         padding: 14px;
         min-height: 105px;
-        background: rgba(128, 128, 128, 0.035);
+        background: rgba(128,128,128,0.035);
     }
 
     .metric-label {
@@ -244,41 +237,39 @@ st.markdown(
     /* NORMAL = GREEN */
 
     .sensor-normal {
-        background-color: rgba(46, 160, 67, 0.14);
+        background-color: rgba(46,160,67,0.14);
         color: #16803a;
-        border: 1px solid rgba(46, 160, 67, 0.28);
+        border: 1px solid rgba(46,160,67,0.28);
     }
 
 
     /* LOW = YELLOW */
 
     .sensor-low {
-        background-color: rgba(245, 158, 11, 0.16);
+        background-color: rgba(245,158,11,0.16);
         color: #b45309;
-        border: 1px solid rgba(245, 158, 11, 0.32);
+        border: 1px solid rgba(245,158,11,0.32);
     }
 
 
     /* HIGH = RED */
 
     .sensor-high {
-        background-color: rgba(220, 53, 69, 0.14);
+        background-color: rgba(220,53,69,0.14);
         color: #b4232d;
-        border: 1px solid rgba(220, 53, 69, 0.28);
+        border: 1px solid rgba(220,53,69,0.28);
     }
 
 
-    /* UNKNOWN / N/A */
-
     .sensor-unknown {
-        background-color: rgba(128, 128, 128, 0.10);
+        background-color: rgba(128,128,128,0.10);
         color: #666;
-        border: 1px solid rgba(128, 128, 128, 0.20);
+        border: 1px solid rgba(128,128,128,0.20);
     }
 
 
     /* =====================================================
-       CONNECTION STATUS
+       CONNECTION
        ===================================================== */
 
     .status-card {
@@ -289,20 +280,20 @@ st.markdown(
     }
 
     .status-online {
-        background-color: rgba(46, 160, 67, 0.12);
+        background-color: rgba(46,160,67,0.12);
         color: #16803a;
-        border: 1px solid rgba(46, 160, 67, 0.18);
+        border: 1px solid rgba(46,160,67,0.18);
     }
 
     .status-offline {
-        background-color: rgba(220, 53, 69, 0.12);
+        background-color: rgba(220,53,69,0.12);
         color: #b4232d;
-        border: 1px solid rgba(220, 53, 69, 0.18);
+        border: 1px solid rgba(220,53,69,0.18);
     }
 
 
     /* =====================================================
-       LIVE BADGE
+       LIVE
        ===================================================== */
 
     .live-badge {
@@ -311,14 +302,14 @@ st.markdown(
         font-weight: 600;
         border-radius: 20px;
         padding: 4px 10px;
-        background-color: rgba(46, 160, 67, 0.12);
+        background-color: rgba(46,160,67,0.12);
         color: #16803a;
-        border: 1px solid rgba(46, 160, 67, 0.18);
+        border: 1px solid rgba(46,160,67,0.18);
     }
 
 
     /* =====================================================
-       CHART TITLE
+       CHART
        ===================================================== */
 
     .chart-title {
@@ -326,44 +317,6 @@ st.markdown(
         font-weight: 600;
         margin-top: 0.5rem;
         margin-bottom: 0.3rem;
-    }
-
-
-    /* =====================================================
-       HISTORICAL TABLE
-       ===================================================== */
-
-    .history-table-container {
-        width: 100%;
-        overflow-x: auto;
-        margin-top: 0.7rem;
-    }
-
-    .history-table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-    }
-
-    .history-table th {
-        border: 1px solid rgba(128, 128, 128, 0.25);
-        padding: 5px 2px;
-        text-align: center;
-        font-size: 8px;
-        font-weight: 650;
-        line-height: 1.1;
-    }
-
-    .history-table td {
-        border: 1px solid rgba(128, 128, 128, 0.20);
-        padding: 4px 2px;
-        text-align: center;
-        font-size: 8px;
-        line-height: 1.1;
-    }
-
-    .history-table tbody tr:nth-child(even) {
-        background-color: rgba(128, 128, 128, 0.04);
     }
 
 
@@ -377,19 +330,10 @@ st.markdown(
             padding-top: 1rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
-            padding-bottom: 1.2rem;
         }
 
         .main-title {
             font-size: 1.45rem;
-        }
-
-        .sub-title {
-            font-size: 0.67rem;
-        }
-
-        .last-record {
-            font-size: 0.64rem;
         }
 
         .section-title {
@@ -420,19 +364,6 @@ st.markdown(
             font-size: 0.55rem;
         }
 
-        .status-card {
-            padding: 9px 10px;
-            font-size: 0.66rem;
-        }
-
-        .live-badge {
-            font-size: 0.58rem;
-        }
-
-        .chart-title {
-            font-size: 0.72rem;
-        }
-
     }
 
     </style>
@@ -442,10 +373,9 @@ st.markdown(
 
 
 # =========================================================
-# STREAMLIT SENSOR THRESHOLDS
+# SENSOR THRESHOLDS
 #
-# These are only used by app.py for display.
-# ESP32 and Azure logic are NOT changed.
+# STREAMLIT ONLY
 # =========================================================
 
 SENSOR_THRESHOLDS = {
@@ -489,7 +419,7 @@ SENSOR_THRESHOLDS = {
 
 
 # =========================================================
-# AZURE STORAGE SETTINGS
+# AZURE SETTINGS
 # =========================================================
 
 STORAGE_ACCOUNT_NAME = st.secrets[
@@ -505,10 +435,6 @@ STORAGE_ACCOUNT_KEY = st.secrets[
 ]
 
 
-# =========================================================
-# AZURE STORAGE URL
-# =========================================================
-
 ACCOUNT_URL = (
     "https://"
     + STORAGE_ACCOUNT_NAME
@@ -517,23 +443,28 @@ ACCOUNT_URL = (
 
 
 # =========================================================
-# CONNECT TO AZURE
+# AZURE CONNECTION
 # =========================================================
 
 def get_container_client():
 
-    blob_service_client = BlobServiceClient(
-        account_url=ACCOUNT_URL,
-        credential=STORAGE_ACCOUNT_KEY
+    blob_service_client = (
+        BlobServiceClient(
+            account_url=ACCOUNT_URL,
+            credential=STORAGE_ACCOUNT_KEY
+        )
     )
 
-    return blob_service_client.get_container_client(
-        CONTAINER_NAME
+    return (
+        blob_service_client
+        .get_container_client(
+            CONTAINER_NAME
+        )
     )
 
 
 # =========================================================
-# READ BLOB RECORDS
+# READ BLOB
 # =========================================================
 
 def read_blob_records(
@@ -551,7 +482,8 @@ def read_blob_records(
         try:
 
             blob_client = (
-                container_client.get_blob_client(
+                container_client
+                .get_blob_client(
                     blob.name
                 )
             )
@@ -584,16 +516,18 @@ def read_blob_records(
                     )
 
                 except json.JSONDecodeError:
+
                     pass
 
         except Exception:
+
             pass
 
     return records
 
 
 # =========================================================
-# PREPARE DATAFRAME
+# PREPARE DATA
 # =========================================================
 
 def prepare_dataframe(
@@ -603,6 +537,7 @@ def prepare_dataframe(
     if len(records) == 0:
         return pd.DataFrame()
 
+
     df = pd.DataFrame(
         records
     )
@@ -610,14 +545,6 @@ def prepare_dataframe(
 
     # =====================================================
     # WATER TANK FIELD COMPATIBILITY
-    #
-    # ESP32 may send:
-    # water_tank_1
-    # water_tank_2
-    #
-    # Streamlit uses:
-    # water_tank_1_level
-    # water_tank_2_level
     # =====================================================
 
     if (
@@ -654,8 +581,12 @@ def prepare_dataframe(
 
     if "timestamp" in df.columns:
 
-        df["timestamp"] = pd.to_datetime(
-            df["timestamp"],
+        df[
+            "timestamp"
+        ] = pd.to_datetime(
+            df[
+                "timestamp"
+            ],
             errors="coerce"
         )
 
@@ -680,7 +611,7 @@ def prepare_dataframe(
 
 
 # =========================================================
-# LOAD RECENT DATA
+# LIVE DATA
 # =========================================================
 
 def load_recent_data():
@@ -696,16 +627,21 @@ def load_recent_data():
     if len(blobs) == 0:
         return pd.DataFrame()
 
+
     blobs.sort(
-        key=lambda blob: blob.last_modified,
+        key=lambda blob:
+            blob.last_modified,
         reverse=True
     )
 
+
     recent_blobs = blobs[:20]
+
 
     records = read_blob_records(
         recent_blobs
     )
+
 
     return prepare_dataframe(
         records
@@ -713,7 +649,7 @@ def load_recent_data():
 
 
 # =========================================================
-# LOAD ALL HISTORICAL DATA
+# HISTORICAL DATA
 # =========================================================
 
 @st.cache_data(
@@ -733,13 +669,17 @@ def load_all_data():
     if len(blobs) == 0:
         return pd.DataFrame()
 
+
     blobs.sort(
-        key=lambda blob: blob.last_modified
+        key=lambda blob:
+            blob.last_modified
     )
+
 
     records = read_blob_records(
         blobs
     )
+
 
     return prepare_dataframe(
         records
@@ -766,7 +706,9 @@ def display_value(
             return "N/A"
 
     except Exception:
+
         pass
+
 
     return (
         str(value)
@@ -793,7 +735,9 @@ def status_value(
             return "UNKNOWN"
 
     except Exception:
+
         pass
+
 
     return str(
         value
@@ -815,8 +759,6 @@ def safe_text(
 
 # =========================================================
 # SENSOR STATUS
-#
-# Used only for Streamlit display.
 # =========================================================
 
 def sensor_status(
@@ -827,15 +769,6 @@ def sensor_status(
     if value is None:
         return "UNKNOWN"
 
-    try:
-
-        if pd.isna(
-            value
-        ):
-            return "UNKNOWN"
-
-    except Exception:
-        pass
 
     try:
 
@@ -855,24 +788,15 @@ def sensor_status(
         sensor_name
     )
 
+
     if limits is None:
         return "UNKNOWN"
 
 
-    # =====================================================
-    # LOW
-    # =====================================================
-
     if value < limits["low"]:
+
         return "LOW"
 
-
-    # =====================================================
-    # HIGH
-    #
-    # Greenhouse temperature and fish tank use >= because
-    # these values are also control trigger points.
-    # =====================================================
 
     if sensor_name in [
         "fish_tank_level",
@@ -888,15 +812,11 @@ def sensor_status(
             return "HIGH"
 
 
-    # =====================================================
-    # NORMAL
-    # =====================================================
-
     return "NORMAL"
 
 
 # =========================================================
-# STATUS CSS CLASS
+# STATUS CSS
 # =========================================================
 
 def sensor_status_class(
@@ -908,13 +828,19 @@ def sensor_status_class(
     )
 
     if status == "NORMAL":
+
         return "sensor-normal"
 
+
     if status == "LOW":
+
         return "sensor-low"
 
+
     if status == "HIGH":
+
         return "sensor-high"
+
 
     return "sensor-unknown"
 
@@ -931,10 +857,13 @@ def metric_card(
 
     status_html = ""
 
+
     if status is not None:
 
-        status_text = status_value(
-            status
+        status_text = (
+            status_value(
+                status
+            )
         )
 
         status_class = (
@@ -953,6 +882,7 @@ def metric_card(
             )
             + '</div>'
         )
+
 
     return (
         '<div class="metric-card">'
@@ -994,13 +924,17 @@ def metric_grid(
             "dashboard-grid"
         )
 
+
     html_code = (
         '<div class="'
         + grid_class
         + '">'
-        + "".join(cards)
+        + "".join(
+            cards
+        )
         + "</div>"
     )
+
 
     st.markdown(
         html_code,
@@ -1009,7 +943,87 @@ def metric_grid(
 
 
 # =========================================================
-# SENSOR CHART WITH THRESHOLD LINES
+# COUNTDOWN TIMER
+#
+# Browser side only.
+# Azure is NOT contacted every second.
+# =========================================================
+
+def show_countdown():
+
+    components.html(
+        """
+        <div style="
+            width:100%;
+            text-align:right;
+            font-family:Arial,sans-serif;
+            font-size:13px;
+            color:#777;
+        ">
+
+            Next update in:
+
+            <span
+                id="countdown"
+                style="
+                    font-weight:700;
+                    color:#16803a;
+                "
+            >
+                30s
+            </span>
+
+        </div>
+
+
+        <script>
+
+            let secondsLeft = 30;
+
+            const timerText =
+                document.getElementById(
+                    "countdown"
+                );
+
+
+            const timer =
+                setInterval(
+                    function() {
+
+                        secondsLeft -= 1;
+
+
+                        if (
+                            secondsLeft <= 0
+                        ) {
+
+                            timerText.textContent =
+                                "Refreshing...";
+
+                            clearInterval(
+                                timer
+                            );
+
+                            return;
+                        }
+
+
+                        timerText.textContent =
+                            secondsLeft
+                            + "s";
+
+                    },
+                    1000
+                );
+
+        </script>
+        """,
+        height=25
+    )
+
+
+# =========================================================
+# SENSOR CHART
 # =========================================================
 
 def sensor_chart(
@@ -1020,16 +1034,20 @@ def sensor_chart(
 ):
 
     if (
-        "timestamp" not in df.columns
+        "timestamp"
+        not in df.columns
         or
-        sensor_name not in df.columns
+        sensor_name
+        not in df.columns
     ):
+
         return
 
 
     limits = SENSOR_THRESHOLDS.get(
         sensor_name
     )
+
 
     if limits is None:
         return
@@ -1071,7 +1089,7 @@ def sensor_chart(
 
 
     # =====================================================
-    # SENSOR READING
+    # ACTUAL SENSOR VALUE
     # =====================================================
 
     reading_chart = (
@@ -1123,7 +1141,7 @@ def sensor_chart(
     # LOW THRESHOLD
     # =====================================================
 
-    low_data = pd.DataFrame(
+    low_df = pd.DataFrame(
         {
             "threshold": [
                 limits["low"]
@@ -1131,9 +1149,10 @@ def sensor_chart(
         }
     )
 
+
     low_line = (
         alt.Chart(
-            low_data
+            low_df
         )
         .mark_rule(
             strokeWidth=2,
@@ -1144,9 +1163,7 @@ def sensor_chart(
         )
         .encode(
 
-            y=alt.Y(
-                "threshold:Q"
-            ),
+            y="threshold:Q",
 
             color=alt.value(
                 "#f59e0b"
@@ -1160,7 +1177,7 @@ def sensor_chart(
     # HIGH THRESHOLD
     # =====================================================
 
-    high_data = pd.DataFrame(
+    high_df = pd.DataFrame(
         {
             "threshold": [
                 limits["high"]
@@ -1168,9 +1185,10 @@ def sensor_chart(
         }
     )
 
+
     high_line = (
         alt.Chart(
-            high_data
+            high_df
         )
         .mark_rule(
             strokeWidth=2,
@@ -1181,9 +1199,7 @@ def sensor_chart(
         )
         .encode(
 
-            y=alt.Y(
-                "threshold:Q"
-            ),
+            y="threshold:Q",
 
             color=alt.value(
                 "#dc2626"
@@ -1197,11 +1213,12 @@ def sensor_chart(
     # LOW LABEL
     # =====================================================
 
-    low_label_data = pd.DataFrame(
+    low_label_df = pd.DataFrame(
         {
             "threshold": [
                 limits["low"]
             ],
+
             "label": [
                 "LOW: "
                 + str(
@@ -1212,9 +1229,10 @@ def sensor_chart(
         }
     )
 
+
     low_label = (
         alt.Chart(
-            low_label_data
+            low_label_df
         )
         .mark_text(
             align="left",
@@ -1224,9 +1242,7 @@ def sensor_chart(
         )
         .encode(
 
-            y=alt.Y(
-                "threshold:Q"
-            ),
+            y="threshold:Q",
 
             text="label:N",
 
@@ -1242,11 +1258,12 @@ def sensor_chart(
     # HIGH LABEL
     # =====================================================
 
-    high_label_data = pd.DataFrame(
+    high_label_df = pd.DataFrame(
         {
             "threshold": [
                 limits["high"]
             ],
+
             "label": [
                 "HIGH: "
                 + str(
@@ -1257,9 +1274,10 @@ def sensor_chart(
         }
     )
 
+
     high_label = (
         alt.Chart(
-            high_label_data
+            high_label_df
         )
         .mark_text(
             align="left",
@@ -1269,9 +1287,7 @@ def sensor_chart(
         )
         .encode(
 
-            y=alt.Y(
-                "threshold:Q"
-            ),
+            y="threshold:Q",
 
             text="label:N",
 
@@ -1282,10 +1298,6 @@ def sensor_chart(
         )
     )
 
-
-    # =====================================================
-    # FINAL CHART
-    # =====================================================
 
     final_chart = (
         reading_chart
@@ -1305,7 +1317,7 @@ def sensor_chart(
 
 
 # =========================================================
-# SIDEBAR MENU
+# SIDEBAR
 # =========================================================
 
 page = st.sidebar.radio(
@@ -1316,10 +1328,6 @@ page = st.sidebar.radio(
     ]
 )
 
-
-# =========================================================
-# LOGOUT
-# =========================================================
 
 st.sidebar.divider()
 
@@ -1334,7 +1342,7 @@ if st.sidebar.button(
 
 
 # =========================================================
-# MAIN PAGE TITLE
+# PAGE TITLE
 # =========================================================
 
 st.markdown(
@@ -1361,19 +1369,22 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # UPDATE EVERY 1 MINUTE
+    # ACTUAL AZURE REFRESH EVERY 30 SECONDS
     # =====================================================
 
     @st.fragment(
-        run_every="60s"
+        run_every="30s"
     )
     def live_dashboard():
 
 
+        # =================================================
+        # LOAD AZURE
+        # =================================================
+
         try:
 
             df = load_recent_data()
-
 
         except Exception as e:
 
@@ -1397,18 +1408,16 @@ if page == "Live Dashboard":
             return
 
 
-        # =================================================
-        # LATEST RECORD
-        # =================================================
-
         latest = df.iloc[-1]
 
 
         # =================================================
-        # TIMESTAMP
+        # LAST SENSOR RECORD
         # =================================================
 
-        record_text = "Unknown"
+        record_text = (
+            "Unknown"
+        )
 
 
         if "timestamp" in df.columns:
@@ -1416,6 +1425,7 @@ if page == "Live Dashboard":
             latest_time = latest[
                 "timestamp"
             ]
+
 
             if pd.notna(
                 latest_time
@@ -1428,8 +1438,10 @@ if page == "Live Dashboard":
                 )
 
 
-        status_left, status_right = st.columns(
-            [4, 1]
+        status_left, status_right = (
+            st.columns(
+                [4, 1]
+            )
         )
 
 
@@ -1459,62 +1471,83 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # CALCULATE SENSOR STATUS
+        # 30 SECOND COUNTDOWN
         # =================================================
 
-        fish_level_status = sensor_status(
-            latest.get(
+        show_countdown()
+
+
+        # =================================================
+        # SENSOR STATUS
+        # =================================================
+
+        fish_level_status = (
+            sensor_status(
+                latest.get(
+                    "fish_tank_level"
+                ),
                 "fish_tank_level"
-            ),
-            "fish_tank_level"
+            )
         )
 
 
-        fish_temperature_status = sensor_status(
-            latest.get(
+        fish_temperature_status = (
+            sensor_status(
+                latest.get(
+                    "fish_temperature"
+                ),
                 "fish_temperature"
-            ),
-            "fish_temperature"
+            )
         )
 
 
-        ph_status = sensor_status(
-            latest.get(
+        ph_status = (
+            sensor_status(
+                latest.get(
+                    "ph"
+                ),
                 "ph"
-            ),
-            "ph"
+            )
         )
 
 
-        greenhouse_temperature_status = sensor_status(
-            latest.get(
+        greenhouse_temperature_status = (
+            sensor_status(
+                latest.get(
+                    "greenhouse_temperature"
+                ),
                 "greenhouse_temperature"
-            ),
-            "greenhouse_temperature"
+            )
         )
 
 
-        soil_moisture_status = sensor_status(
-            latest.get(
+        soil_moisture_status = (
+            sensor_status(
+                latest.get(
+                    "soil_moisture"
+                ),
                 "soil_moisture"
-            ),
-            "soil_moisture"
+            )
         )
 
 
-        tank1_status = sensor_status(
-            latest.get(
+        tank1_status = (
+            sensor_status(
+                latest.get(
+                    "water_tank_1_level"
+                ),
                 "water_tank_1_level"
-            ),
-            "water_tank_1_level"
+            )
         )
 
 
-        tank2_status = sensor_status(
-            latest.get(
+        tank2_status = (
+            sensor_status(
+                latest.get(
+                    "water_tank_2_level"
+                ),
                 "water_tank_2_level"
-            ),
-            "water_tank_2_level"
+            )
         )
 
 
@@ -1537,42 +1570,49 @@ if page == "Live Dashboard":
 
             metric_card(
                 "Fish Tank Level",
+
                 display_value(
                     latest.get(
                         "fish_tank_level"
                     ),
                     "%"
                 ),
+
                 fish_level_status
             ),
 
 
             metric_card(
                 "Fish Temperature",
+
                 display_value(
                     latest.get(
                         "fish_temperature"
                     ),
                     " °C"
                 ),
+
                 fish_temperature_status
             ),
 
 
             metric_card(
                 "pH",
+
                 display_value(
                     latest.get(
                         "ph"
                     )
                 ),
+
                 ph_status
             ),
 
 
-            # Pump stays ON/OFF only
+            # ON/OFF ONLY
             metric_card(
                 "Fish Refill Pump",
+
                 status_value(
                     latest.get(
                         "fish_refill_pump"
@@ -1608,31 +1648,36 @@ if page == "Live Dashboard":
 
             metric_card(
                 "Temperature",
+
                 display_value(
                     latest.get(
                         "greenhouse_temperature"
                     ),
                     " °C"
                 ),
+
                 greenhouse_temperature_status
             ),
 
 
             metric_card(
                 "Soil Moisture",
+
                 display_value(
                     latest.get(
                         "soil_moisture"
                     ),
                     "%"
                 ),
+
                 soil_moisture_status
             ),
 
 
-            # Pump stays ON/OFF only
+            # ON/OFF ONLY
             metric_card(
                 "Greenhouse Pump",
+
                 status_value(
                     latest.get(
                         "greenhouse_pump"
@@ -1641,9 +1686,10 @@ if page == "Live Dashboard":
             ),
 
 
-            # Fan stays ON/OFF only
+            # ON/OFF ONLY
             metric_card(
                 "Fan",
+
                 status_value(
                     latest.get(
                         "fan"
@@ -1679,24 +1725,28 @@ if page == "Live Dashboard":
 
             metric_card(
                 "Water Tank 1",
+
                 display_value(
                     latest.get(
                         "water_tank_1_level"
                     ),
                     "%"
                 ),
+
                 tank1_status
             ),
 
 
             metric_card(
                 "Water Tank 2",
+
                 display_value(
                     latest.get(
                         "water_tank_2_level"
                     ),
                     "%"
                 ),
+
                 tank2_status
             )
 
@@ -1724,9 +1774,11 @@ if page == "Live Dashboard":
         )
 
 
-        wifi_status = status_value(
-            latest.get(
-                "wifi"
+        wifi_status = (
+            status_value(
+                latest.get(
+                    "wifi"
+                )
             )
         )
 
@@ -1767,7 +1819,6 @@ if page == "Live Dashboard":
 
 
             '</div>'
-
         )
 
 
@@ -1800,11 +1851,13 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # FISH TANK + FISH TEMPERATURE
+        # ROW 1
         # =================================================
 
-        chart1, chart2 = st.columns(
-            2
+        chart1, chart2 = (
+            st.columns(
+                2
+            )
         )
 
 
@@ -1829,11 +1882,13 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # PH + GREENHOUSE TEMPERATURE
+        # ROW 2
         # =================================================
 
-        chart1, chart2 = st.columns(
-            2
+        chart1, chart2 = (
+            st.columns(
+                2
+            )
         )
 
 
@@ -1857,11 +1912,13 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # SOIL + WATER TANK 1
+        # ROW 3
         # =================================================
 
-        chart1, chart2 = st.columns(
-            2
+        chart1, chart2 = (
+            st.columns(
+                2
+            )
         )
 
 
@@ -1886,7 +1943,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # WATER TANK 2
+        # ROW 4
         # =================================================
 
         sensor_chart(
@@ -1913,7 +1970,7 @@ if page == "Live Dashboard":
 
 
 # =========================================================
-# HISTORICAL DATA PAGE
+# HISTORICAL DATA
 # =========================================================
 
 elif page == "Historical Data":
@@ -1936,7 +1993,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # REFRESH HISTORY
+    # REFRESH
     # =====================================================
 
     if st.button(
@@ -1948,7 +2005,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # LOAD HISTORY
+    # LOAD DATA
     # =====================================================
 
     try:
@@ -1960,7 +2017,6 @@ elif page == "Historical Data":
             history_df = (
                 load_all_data()
             )
-
 
     except Exception as e:
 
@@ -1997,7 +2053,8 @@ elif page == "Historical Data":
         history_df[
             "timestamp"
         ].min()
-        if "timestamp"
+        if
+        "timestamp"
         in history_df.columns
         else None
     )
@@ -2007,14 +2064,17 @@ elif page == "Historical Data":
         history_df[
             "timestamp"
         ].max()
-        if "timestamp"
+        if
+        "timestamp"
         in history_df.columns
         else None
     )
 
 
-    col1, col2, col3 = st.columns(
-        3
+    col1, col2, col3 = (
+        st.columns(
+            3
+        )
     )
 
 
@@ -2032,6 +2092,7 @@ elif page == "Historical Data":
 
             st.metric(
                 "Oldest Record",
+
                 first_record.strftime(
                     "%d/%m/%Y %H:%M"
                 )
@@ -2044,6 +2105,7 @@ elif page == "Historical Data":
 
             st.metric(
                 "Latest Record",
+
                 latest_record.strftime(
                     "%d/%m/%Y %H:%M"
                 )
@@ -2062,7 +2124,10 @@ elif page == "Historical Data":
     )
 
 
-    if "timestamp" in filtered_df.columns:
+    if (
+        "timestamp"
+        in filtered_df.columns
+    ):
 
         minimum_date = (
             filtered_df[
@@ -2082,14 +2147,19 @@ elif page == "Historical Data":
         )
 
 
-        selected_dates = st.date_input(
-            "Filter by Date",
-            value=(
-                minimum_date,
-                maximum_date
-            ),
-            min_value=minimum_date,
-            max_value=maximum_date
+        selected_dates = (
+            st.date_input(
+                "Filter by Date",
+
+                value=(
+                    minimum_date,
+                    maximum_date
+                ),
+
+                min_value=minimum_date,
+
+                max_value=maximum_date
+            )
         )
 
 
@@ -2113,25 +2183,27 @@ elif page == "Historical Data":
             )
 
 
-            filtered_df = filtered_df[
-                (
-                    filtered_df[
-                        "timestamp"
-                    ].dt.date
-                    >= start_date
-                )
-                &
-                (
-                    filtered_df[
-                        "timestamp"
-                    ].dt.date
-                    <= end_date
-                )
-            ]
+            filtered_df = (
+                filtered_df[
+                    (
+                        filtered_df[
+                            "timestamp"
+                        ].dt.date
+                        >= start_date
+                    )
+                    &
+                    (
+                        filtered_df[
+                            "timestamp"
+                        ].dt.date
+                        <= end_date
+                    )
+                ]
+            )
 
 
     # =====================================================
-    # TABLE COLUMNS
+    # COLUMNS
     # =====================================================
 
     preferred_columns = [
@@ -2179,123 +2251,76 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # ADD STREAMLIT SENSOR STATUS
+    # ADD STATUS
     # =====================================================
 
-    if "fish_tank_level" in table_df.columns:
+    sensor_columns = {
 
-        table_df[
-            "Fish Tank Status"
-        ] = table_df[
-            "fish_tank_level"
-        ].apply(
-            lambda value:
-                sensor_status(
-                    value,
-                    "fish_tank_level"
-                )
-        )
+        "fish_tank_level":
+            "Fish Tank Status",
 
+        "fish_temperature":
+            "Fish Temp Status",
 
-    if "fish_temperature" in table_df.columns:
+        "ph":
+            "pH Status",
 
-        table_df[
-            "Fish Temp Status"
-        ] = table_df[
-            "fish_temperature"
-        ].apply(
-            lambda value:
-                sensor_status(
-                    value,
-                    "fish_temperature"
-                )
-        )
+        "greenhouse_temperature":
+            "GH Temp Status",
 
+        "soil_moisture":
+            "Soil Status",
 
-    if "ph" in table_df.columns:
+        "water_tank_1_level":
+            "Tank 1 Status",
 
-        table_df[
-            "pH Status"
-        ] = table_df[
-            "ph"
-        ].apply(
-            lambda value:
-                sensor_status(
-                    value,
-                    "ph"
-                )
-        )
-
-
-    if "greenhouse_temperature" in table_df.columns:
-
-        table_df[
-            "GH Temp Status"
-        ] = table_df[
-            "greenhouse_temperature"
-        ].apply(
-            lambda value:
-                sensor_status(
-                    value,
-                    "greenhouse_temperature"
-                )
-        )
-
-
-    if "soil_moisture" in table_df.columns:
-
-        table_df[
-            "Soil Status"
-        ] = table_df[
-            "soil_moisture"
-        ].apply(
-            lambda value:
-                sensor_status(
-                    value,
-                    "soil_moisture"
-                )
-        )
-
-
-    if "water_tank_1_level" in table_df.columns:
-
-        table_df[
-            "Tank 1 Status"
-        ] = table_df[
-            "water_tank_1_level"
-        ].apply(
-            lambda value:
-                sensor_status(
-                    value,
-                    "water_tank_1_level"
-                )
-        )
-
-
-    if "water_tank_2_level" in table_df.columns:
-
-        table_df[
+        "water_tank_2_level":
             "Tank 2 Status"
-        ] = table_df[
-            "water_tank_2_level"
-        ].apply(
-            lambda value:
-                sensor_status(
-                    value,
-                    "water_tank_2_level"
-                )
-        )
+
+    }
+
+
+    for (
+        sensor_name,
+        status_column
+    ) in sensor_columns.items():
+
+        if (
+            sensor_name
+            in table_df.columns
+        ):
+
+            table_df[
+                status_column
+            ] = table_df[
+                sensor_name
+            ].apply(
+
+                lambda value,
+                sensor=sensor_name:
+
+                    sensor_status(
+                        value,
+                        sensor
+                    )
+
+            )
 
 
     # =====================================================
-    # SORT NEWEST FIRST
+    # SORT
     # =====================================================
 
-    if "timestamp" in table_df.columns:
+    if (
+        "timestamp"
+        in table_df.columns
+    ):
 
-        table_df = table_df.sort_values(
-            "timestamp",
-            ascending=False
+        table_df = (
+            table_df.sort_values(
+                "timestamp",
+                ascending=False
+            )
         )
 
 
@@ -2312,57 +2337,59 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # SHORT COLUMN NAMES
+    # SHORT NAMES
     # =====================================================
 
-    table_df = table_df.rename(
-        columns={
+    table_df = (
+        table_df.rename(
+            columns={
 
-            "timestamp":
-                "Timestamp",
+                "timestamp":
+                    "Timestamp",
 
-            "fish_tank_level":
-                "Fish Tank",
+                "fish_tank_level":
+                    "Fish Tank",
 
-            "fish_temperature":
-                "Fish Temp",
+                "fish_temperature":
+                    "Fish Temp",
 
-            "ph":
-                "pH",
+                "ph":
+                    "pH",
 
-            "fish_refill_pump":
-                "Refill",
+                "fish_refill_pump":
+                    "Refill",
 
-            "greenhouse_temperature":
-                "GH Temp",
+                "greenhouse_temperature":
+                    "GH Temp",
 
-            "soil_moisture":
-                "Soil",
+                "soil_moisture":
+                    "Soil",
 
-            "greenhouse_pump":
-                "GH Pump",
+                "greenhouse_pump":
+                    "GH Pump",
 
-            "fan":
-                "Fan",
+                "fan":
+                    "Fan",
 
-            "water_tank_1_level":
-                "Tank 1",
+                "water_tank_1_level":
+                    "Tank 1",
 
-            "water_tank_2_level":
-                "Tank 2",
+                "water_tank_2_level":
+                    "Tank 2",
 
-            "dht_status":
-                "Temp Sensor",
+                "dht_status":
+                    "Temp Sensor",
 
-            "wifi":
-                "Wi-Fi"
+                "wifi":
+                    "Wi-Fi"
 
-        }
+            }
+        )
     )
 
 
     # =====================================================
-    # RECORD COUNT
+    # TABLE
     # =====================================================
 
     st.write(
@@ -2376,10 +2403,6 @@ elif page == "Historical Data":
     )
 
 
-    # =====================================================
-    # TABLE
-    # =====================================================
-
     st.dataframe(
         table_df,
         use_container_width=True,
@@ -2388,7 +2411,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # DOWNLOAD CSV
+    # DOWNLOAD
     # =====================================================
 
     csv_data = (
@@ -2406,10 +2429,13 @@ elif page == "Historical Data":
         label=(
             "Download Historical Data CSV"
         ),
+
         data=csv_data,
+
         file_name=(
             "smart_aquaponic_greenhouse_history.csv"
         ),
+
         mime="text/csv"
     )
 

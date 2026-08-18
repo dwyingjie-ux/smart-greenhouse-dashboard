@@ -177,7 +177,7 @@ st.markdown(
 
 
     /* =====================================================
-       GRIDS
+       DASHBOARD GRIDS
        ===================================================== */
 
     .dashboard-grid {
@@ -343,25 +343,51 @@ st.markdown(
 
 
     /* =====================================================
-       HISTORICAL TABLE
+       HISTORICAL TABLE SCROLL BOX
        ===================================================== */
 
     .history-wrapper {
+
         width: 100%;
+
+        /* Fixed table height */
+        max-height: 500px;
+
+        /* Scroll inside table */
+        overflow-y: auto;
         overflow-x: auto;
+
         border: 1px solid rgba(128, 128, 128, 0.20);
         border-radius: 10px;
+
         margin-top: 10px;
+        margin-bottom: 10px;
     }
 
+
+    /* =====================================================
+       HISTORICAL TABLE
+       ===================================================== */
+
     .history-table {
+
         width: 100%;
-        border-collapse: collapse;
+
+        border-collapse: separate;
+        border-spacing: 0;
+
         table-layout: auto;
+
         margin: 0;
     }
 
+
+    /* =====================================================
+       HISTORICAL HEADER
+       ===================================================== */
+
     .history-table th {
+
         text-align: center !important;
         vertical-align: middle !important;
 
@@ -373,12 +399,26 @@ st.markdown(
         border-bottom: 1px solid rgba(128, 128, 128, 0.25);
         border-right: 1px solid rgba(128, 128, 128, 0.15);
 
-        background-color: rgba(128, 128, 128, 0.06);
+        background-color: #f7f7f7;
 
         white-space: nowrap;
+
+
+        /* Keep header visible */
+        position: sticky;
+
+        top: 0;
+
+        z-index: 5;
     }
 
+
+    /* =====================================================
+       HISTORICAL VALUES
+       ===================================================== */
+
     .history-table td {
+
         text-align: center !important;
         vertical-align: middle !important;
 
@@ -392,16 +432,28 @@ st.markdown(
         white-space: nowrap;
     }
 
+
+    /* Last column no right border */
+
     .history-table th:last-child,
     .history-table td:last-child {
+
         border-right: none;
     }
 
+
+    /* Alternate row */
+
     .history-table tbody tr:nth-child(even) {
+
         background-color: rgba(128, 128, 128, 0.025);
     }
 
+
+    /* Hover row */
+
     .history-table tbody tr:hover {
+
         background-color: rgba(128, 128, 128, 0.07);
     }
 
@@ -413,45 +465,62 @@ st.markdown(
     @media (max-width: 768px) {
 
         .block-container {
+
             padding-top: 1rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
         }
 
         .main-title {
+
             font-size: 1.45rem;
         }
 
         .section-title {
+
             font-size: 1rem;
         }
 
         .dashboard-grid,
         .dashboard-grid-2 {
+
             grid-template-columns: repeat(2, minmax(0, 1fr));
+
             gap: 7px;
         }
 
         .metric-card {
+
             min-height: 82px;
+
             padding: 9px;
         }
 
         .metric-label {
+
             font-size: 0.60rem;
         }
 
         .metric-value {
+
             font-size: 1.08rem;
         }
 
         .metric-status {
+
             font-size: 0.55rem;
+        }
+
+        .history-wrapper {
+
+            max-height: 400px;
         }
 
         .history-table th,
         .history-table td {
+
             font-size: 0.65rem;
+
             padding: 7px 5px;
         }
 
@@ -464,7 +533,7 @@ st.markdown(
 
 
 # =========================================================
-# REFRESH
+# REFRESH SETTINGS
 # =========================================================
 
 REFRESH_SECONDS = 30
@@ -515,7 +584,7 @@ SENSOR_THRESHOLDS = {
 
 
 # =========================================================
-# AZURE SETTINGS
+# AZURE STORAGE SETTINGS
 # =========================================================
 
 STORAGE_ACCOUNT_NAME = st.secrets[
@@ -539,7 +608,7 @@ ACCOUNT_URL = (
 
 
 # =========================================================
-# AZURE CONNECTION
+# CONNECT TO AZURE
 # =========================================================
 
 def get_container_client():
@@ -558,7 +627,9 @@ def get_container_client():
 # READ BLOB RECORDS
 # =========================================================
 
-def read_blob_records(blobs):
+def read_blob_records(
+    blobs
+):
 
     container_client = get_container_client()
 
@@ -593,6 +664,7 @@ def read_blob_records(blobs):
 
 
                 if not line:
+
                     continue
 
 
@@ -603,6 +675,7 @@ def read_blob_records(blobs):
                             line
                         )
                     )
+
 
                 except json.JSONDecodeError:
 
@@ -621,7 +694,9 @@ def read_blob_records(blobs):
 # PREPARE DATAFRAME
 # =========================================================
 
-def prepare_dataframe(records):
+def prepare_dataframe(
+    records
+):
 
     if len(records) == 0:
 
@@ -665,7 +740,12 @@ def prepare_dataframe(records):
         ]
 
 
-    # Azure historical status not sent yet
+    # =====================================================
+    # AZURE HISTORY
+    #
+    # ESP32 is not sending Azure status yet.
+    # =====================================================
+
     if "azure" not in df.columns:
 
         df[
@@ -752,7 +832,7 @@ def load_recent_data():
 
 
 # =========================================================
-# HISTORICAL DATA
+# LOAD HISTORICAL DATA
 # =========================================================
 
 @st.cache_data(
@@ -806,9 +886,12 @@ def display_value(
 
     try:
 
-        if pd.isna(value):
+        if pd.isna(
+            value
+        ):
 
             return "N/A"
+
 
     except Exception:
 
@@ -825,7 +908,9 @@ def display_value(
 # STATUS VALUE
 # =========================================================
 
-def status_value(value):
+def status_value(
+    value
+):
 
     if value is None:
 
@@ -834,9 +919,12 @@ def status_value(value):
 
     try:
 
-        if pd.isna(value):
+        if pd.isna(
+            value
+        ):
 
             return "UNKNOWN"
+
 
     except Exception:
 
@@ -852,7 +940,9 @@ def status_value(value):
 # SAFE HTML
 # =========================================================
 
-def safe_text(value):
+def safe_text(
+    value
+):
 
     return html.escape(
         str(value)
@@ -874,6 +964,7 @@ def sensor_status(
             value
         )
 
+
     except (
         TypeError,
         ValueError
@@ -892,7 +983,9 @@ def sensor_status(
         return "UNKNOWN"
 
 
-    if value < limits["low"]:
+    if value < limits[
+        "low"
+    ]:
 
         return "LOW"
 
@@ -902,12 +995,16 @@ def sensor_status(
         "greenhouse_temperature"
     ]:
 
-        if value >= limits["high"]:
+        if value >= limits[
+            "high"
+        ]:
 
             return "HIGH"
 
 
-    elif value > limits["high"]:
+    elif value > limits[
+        "high"
+    ]:
 
         return "HIGH"
 
@@ -916,10 +1013,12 @@ def sensor_status(
 
 
 # =========================================================
-# STATUS CLASS
+# SENSOR STATUS CLASS
 # =========================================================
 
-def sensor_status_class(status):
+def sensor_status_class(
+    status
+):
 
     status = status_value(
         status
@@ -984,10 +1083,14 @@ def metric_card(
     return (
         '<div class="metric-card">'
         '<div class="metric-label">'
-        + safe_text(label)
+        + safe_text(
+            label
+        )
         + '</div>'
         '<div class="metric-value">'
-        + safe_text(value)
+        + safe_text(
+            value
+        )
         + '</div>'
         + status_html
         + '</div>'
@@ -1020,7 +1123,9 @@ def metric_grid(
         '<div class="'
         + grid_class
         + '">'
-        + "".join(cards)
+        + "".join(
+            cards
+        )
         + "</div>"
     )
 
@@ -1043,9 +1148,11 @@ def sensor_chart(
 ):
 
     if (
-        "timestamp" not in df.columns
+        "timestamp"
+        not in df.columns
         or
-        sensor_name not in df.columns
+        sensor_name
+        not in df.columns
     ):
 
         return
@@ -1097,6 +1204,10 @@ def sensor_chart(
     )
 
 
+    # =====================================================
+    # SENSOR READING
+    # =====================================================
+
     reading_chart = (
         alt.Chart(
             chart_df
@@ -1145,10 +1256,16 @@ def sensor_chart(
     )
 
 
+    # =====================================================
+    # LOW THRESHOLD
+    # =====================================================
+
     low_df = pd.DataFrame(
         {
             "threshold": [
-                limits["low"]
+                limits[
+                    "low"
+                ]
             ]
         }
     )
@@ -1177,10 +1294,16 @@ def sensor_chart(
     )
 
 
+    # =====================================================
+    # HIGH THRESHOLD
+    # =====================================================
+
     high_df = pd.DataFrame(
         {
             "threshold": [
-                limits["high"]
+                limits[
+                    "high"
+                ]
             ]
         }
     )
@@ -1209,16 +1332,24 @@ def sensor_chart(
     )
 
 
+    # =====================================================
+    # LOW LABEL
+    # =====================================================
+
     low_label_df = pd.DataFrame(
         {
             "threshold": [
-                limits["low"]
+                limits[
+                    "low"
+                ]
             ],
 
             "label": [
                 "LOW: "
                 + str(
-                    limits["low"]
+                    limits[
+                        "low"
+                    ]
                 )
                 + unit
             ]
@@ -1250,16 +1381,24 @@ def sensor_chart(
     )
 
 
+    # =====================================================
+    # HIGH LABEL
+    # =====================================================
+
     high_label_df = pd.DataFrame(
         {
             "threshold": [
-                limits["high"]
+                limits[
+                    "high"
+                ]
             ],
 
             "label": [
                 "HIGH: "
                 + str(
-                    limits["high"]
+                    limits[
+                        "high"
+                    ]
                 )
                 + unit
             ]
@@ -1362,7 +1501,7 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # LIVE SESSION DATA
+    # SESSION DATA
     # =====================================================
 
     if "live_df" not in st.session_state:
@@ -1378,7 +1517,7 @@ if page == "Live Dashboard":
     # =====================================================
     # LIVE FRAGMENT
     #
-    # Checks every second.
+    # Runs every second for countdown.
     # Azure only reads every 30 seconds.
     # =====================================================
 
@@ -1456,13 +1595,19 @@ if page == "Live Dashboard":
             '<div class="countdown-box">'
             'Next update in: '
             '<span class="countdown-value">'
-            + str(seconds_left)
+            + str(
+                seconds_left
+            )
             + 's'
             '</span>'
             '</div>',
             unsafe_allow_html=True
         )
 
+
+        # =================================================
+        # LIVE DATA
+        # =================================================
 
         df = st.session_state.live_df
 
@@ -1480,11 +1625,13 @@ if page == "Live Dashboard":
             return
 
 
-        latest = df.iloc[-1]
+        latest = df.iloc[
+            -1
+        ]
 
 
         # =================================================
-        # TIMESTAMP
+        # RECORD TIMESTAMP
         # =================================================
 
         record_text = "Unknown"
@@ -1542,7 +1689,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # STATUS
+        # SENSOR STATUS
         # =================================================
 
         fish_level_status = sensor_status(
@@ -1754,7 +1901,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # WATER
+        # WATER SYSTEM
         # =================================================
 
         st.divider()
@@ -1845,6 +1992,7 @@ if page == "Live Dashboard":
             (
                 '<div class="dashboard-grid-2">'
 
+
                 '<div class="'
                 + wifi_class
                 + '">'
@@ -1854,9 +2002,11 @@ if page == "Live Dashboard":
                 )
                 + '</div>'
 
+
                 '<div class="status-card status-online">'
                 'Azure: ONLINE'
                 '</div>'
+
 
                 '</div>'
             ),
@@ -1886,6 +2036,10 @@ if page == "Live Dashboard":
         )
 
 
+        # =================================================
+        # GRAPH ROW 1
+        # =================================================
+
         chart1, chart2 = st.columns(
             2
         )
@@ -1911,6 +2065,10 @@ if page == "Live Dashboard":
             )
 
 
+        # =================================================
+        # GRAPH ROW 2
+        # =================================================
+
         chart1, chart2 = st.columns(
             2
         )
@@ -1934,6 +2092,10 @@ if page == "Live Dashboard":
                 " °C"
             )
 
+
+        # =================================================
+        # GRAPH ROW 3
+        # =================================================
 
         chart1, chart2 = st.columns(
             2
@@ -1960,6 +2122,10 @@ if page == "Live Dashboard":
             )
 
 
+        # =================================================
+        # GRAPH ROW 4
+        # =================================================
+
         sensor_chart(
             df,
             "water_tank_2_level",
@@ -1967,6 +2133,10 @@ if page == "Live Dashboard":
             "%"
         )
 
+
+        # =================================================
+        # FOOTER
+        # =================================================
 
         st.caption(
             "Data source: "
@@ -2016,7 +2186,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # LOAD DATA
+    # LOAD HISTORICAL DATA
     # =====================================================
 
     try:
@@ -2100,6 +2270,7 @@ elif page == "Historical Data":
 
             st.metric(
                 "Oldest Record",
+
                 first_record.strftime(
                     "%d/%m/%Y %H:%M"
                 )
@@ -2112,6 +2283,7 @@ elif page == "Historical Data":
 
             st.metric(
                 "Latest Record",
+
                 latest_record.strftime(
                     "%d/%m/%Y %H:%M"
                 )
@@ -2177,12 +2349,16 @@ elif page == "Historical Data":
         ):
 
             start_date = (
-                selected_dates[0]
+                selected_dates[
+                    0
+                ]
             )
 
 
             end_date = (
-                selected_dates[1]
+                selected_dates[
+                    1
+                ]
             )
 
 
@@ -2206,32 +2382,54 @@ elif page == "Historical Data":
     # =====================================================
     # IMPORTANT HISTORICAL COLUMNS
     #
-    # Greenhouse
-    # Fish
-    # Tanks
-    # Connection
+    # ORDER:
+    #
+    # GREENHOUSE
+    # FISH
+    # WATER
+    # CONNECTION
     # =====================================================
 
     preferred_columns = [
 
+        # -------------------------------------------------
+        # TIME
+        # -------------------------------------------------
+
         "timestamp",
 
-        # Greenhouse
+
+        # -------------------------------------------------
+        # GREENHOUSE
+        # -------------------------------------------------
+
         "greenhouse_temperature",
         "soil_moisture",
         "fan",
         "greenhouse_pump",
 
-        # Fish
+
+        # -------------------------------------------------
+        # FISH
+        # -------------------------------------------------
+
         "fish_tank_level",
         "ph",
         "fish_refill_pump",
 
-        # Water
+
+        # -------------------------------------------------
+        # WATER TANKS
+        # -------------------------------------------------
+
         "water_tank_1_level",
         "water_tank_2_level",
 
-        # Connection
+
+        # -------------------------------------------------
+        # CONNECTION
+        # -------------------------------------------------
+
         "wifi",
         "azure"
 
@@ -2263,7 +2461,10 @@ elif page == "Historical Data":
     # SORT NEWEST FIRST
     # =====================================================
 
-    if "timestamp" in table_df.columns:
+    if (
+        "timestamp"
+        in table_df.columns
+    ):
 
         table_df = table_df.sort_values(
             "timestamp",
@@ -2284,7 +2485,10 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # FORMAT NUMBERS
+    # FORMAT pH
+    #
+    # Example:
+    # 6.700000 -> 6.7
     # =====================================================
 
     if (
@@ -2298,13 +2502,22 @@ elif page == "Historical Data":
             "ph"
         ].apply(
             lambda value:
+
                 (
                     f"{float(value):.1f}"
-                    if pd.notna(value)
+
+                    if pd.notna(
+                        value
+                    )
+
                     else "N/A"
                 )
         )
 
+
+    # =====================================================
+    # FORMAT GREENHOUSE TEMPERATURE
+    # =====================================================
 
     if (
         "greenhouse_temperature"
@@ -2317,9 +2530,14 @@ elif page == "Historical Data":
             "greenhouse_temperature"
         ].apply(
             lambda value:
+
                 (
                     f"{float(value):g}"
-                    if pd.notna(value)
+
+                    if pd.notna(
+                        value
+                    )
+
                     else "N/A"
                 )
         )
@@ -2332,8 +2550,17 @@ elif page == "Historical Data":
     table_df = table_df.rename(
         columns={
 
+            # ---------------------------------------------
+            # TIME
+            # ---------------------------------------------
+
             "timestamp":
                 "Timestamp",
+
+
+            # ---------------------------------------------
+            # GREENHOUSE
+            # ---------------------------------------------
 
             "greenhouse_temperature":
                 "GH Temp",
@@ -2347,6 +2574,11 @@ elif page == "Historical Data":
             "greenhouse_pump":
                 "GH Pump",
 
+
+            # ---------------------------------------------
+            # FISH
+            # ---------------------------------------------
+
             "fish_tank_level":
                 "Fish Tank",
 
@@ -2356,11 +2588,21 @@ elif page == "Historical Data":
             "fish_refill_pump":
                 "Refill Pump",
 
+
+            # ---------------------------------------------
+            # WATER
+            # ---------------------------------------------
+
             "water_tank_1_level":
                 "Tank 1",
 
             "water_tank_2_level":
                 "Tank 2",
+
+
+            # ---------------------------------------------
+            # CONNECTION
+            # ---------------------------------------------
 
             "wifi":
                 "Wi-Fi",
@@ -2388,7 +2630,10 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # FULLY CENTRED HTML TABLE
+    # SCROLLABLE HISTORICAL TABLE
+    #
+    # Header remains visible.
+    # Table scrolls vertically.
     # =====================================================
 
     table_html = table_df.to_html(

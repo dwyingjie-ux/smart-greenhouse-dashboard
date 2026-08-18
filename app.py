@@ -18,27 +18,18 @@ st.set_page_config(
 
 
 # =========================================================
-# RESPONSIVE CSS
+# CSS
 # =========================================================
 
 st.markdown(
     """
     <style>
 
-    /* =====================================================
-       MAIN PAGE
-       ===================================================== */
-
     .block-container {
         padding-top: 1.8rem;
         padding-bottom: 2rem;
         max-width: 1500px;
     }
-
-
-    /* =====================================================
-       TITLE
-       ===================================================== */
 
     .main-title {
         font-size: 2.2rem;
@@ -59,22 +50,12 @@ st.markdown(
         margin-top: 0.2rem;
     }
 
-
-    /* =====================================================
-       SECTION TITLE
-       ===================================================== */
-
     .section-title {
         font-size: 1.35rem;
         font-weight: 700;
         margin-top: 1rem;
         margin-bottom: 0.7rem;
     }
-
-
-    /* =====================================================
-       DASHBOARD GRID
-       ===================================================== */
 
     .dashboard-grid {
         display: grid;
@@ -100,45 +81,30 @@ st.markdown(
         margin-bottom: 10px;
     }
 
-
-    /* =====================================================
-       METRIC CARDS
-       ===================================================== */
-
     .metric-card {
         border: 1px solid rgba(128, 128, 128, 0.20);
         border-radius: 10px;
-        padding: 14px 14px 12px 14px;
+        padding: 14px;
         min-height: 92px;
         background: rgba(128, 128, 128, 0.035);
-        overflow: hidden;
     }
 
     .metric-label {
         font-size: 0.78rem;
         color: #666;
         margin-bottom: 6px;
-        line-height: 1.15;
     }
 
     .metric-value {
         font-size: 1.55rem;
         font-weight: 600;
-        line-height: 1.15;
-        overflow-wrap: anywhere;
     }
 
     .metric-status {
         font-size: 0.68rem;
         color: #777;
         margin-top: 6px;
-        line-height: 1.15;
     }
-
-
-    /* =====================================================
-       CONNECTION STATUS
-       ===================================================== */
 
     .status-card {
         border-radius: 9px;
@@ -159,11 +125,6 @@ st.markdown(
         border: 1px solid rgba(220, 53, 69, 0.18);
     }
 
-
-    /* =====================================================
-       LIVE BADGE
-       ===================================================== */
-
     .live-badge {
         display: inline-block;
         font-size: 0.72rem;
@@ -175,16 +136,30 @@ st.markdown(
         border: 1px solid rgba(46, 160, 67, 0.18);
     }
 
-
-    /* =====================================================
-       CHART TITLE
-       ===================================================== */
-
     .chart-title {
         font-size: 0.9rem;
         font-weight: 600;
         margin-top: 0.5rem;
         margin-bottom: 0.3rem;
+    }
+
+
+    /* =====================================================
+       LOGIN
+       ===================================================== */
+
+    .login-title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-top: 3rem;
+    }
+
+    .login-subtitle {
+        text-align: center;
+        color: #777;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
     }
 
 
@@ -205,7 +180,7 @@ st.markdown(
     }
 
     .history-table th {
-        border: 1px solid rgba(128, 128, 128, 0.25);
+        border: 1px solid rgba(128,128,128,0.25);
         padding: 5px 2px;
         text-align: center;
         font-size: 8px;
@@ -213,29 +188,25 @@ st.markdown(
         line-height: 1.1;
         white-space: normal;
         overflow-wrap: anywhere;
-        vertical-align: middle;
     }
 
     .history-table td {
-        border: 1px solid rgba(128, 128, 128, 0.20);
+        border: 1px solid rgba(128,128,128,0.20);
         padding: 4px 2px;
         text-align: center;
         font-size: 8px;
         line-height: 1.1;
         white-space: normal;
         overflow-wrap: anywhere;
-        vertical-align: middle;
     }
 
     .history-table tbody tr:nth-child(even) {
-        background-color: rgba(128, 128, 128, 0.04);
+        background-color: rgba(128,128,128,0.04);
     }
 
     .history-table tbody tr:hover {
-        background-color: rgba(128, 128, 128, 0.08);
+        background-color: rgba(128,128,128,0.08);
     }
-
-    /* Timestamp gets slightly more room */
 
     .history-table th:first-child,
     .history-table td:first-child {
@@ -244,7 +215,7 @@ st.markdown(
 
 
     /* =====================================================
-       PHONE
+       MOBILE
        ===================================================== */
 
     @media (max-width: 768px) {
@@ -253,12 +224,10 @@ st.markdown(
             padding-top: 1rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
-            padding-bottom: 1.2rem;
         }
 
         .main-title {
             font-size: 1.45rem;
-            line-height: 1.2;
         }
 
         .sub-title {
@@ -271,8 +240,6 @@ st.markdown(
 
         .section-title {
             font-size: 1rem;
-            margin-top: 0.65rem;
-            margin-bottom: 0.45rem;
         }
 
         .dashboard-grid,
@@ -284,13 +251,11 @@ st.markdown(
 
         .metric-card {
             min-height: 72px;
-            padding: 9px 9px 8px 9px;
-            border-radius: 8px;
+            padding: 9px;
         }
 
         .metric-label {
             font-size: 0.60rem;
-            margin-bottom: 4px;
         }
 
         .metric-value {
@@ -299,7 +264,6 @@ st.markdown(
 
         .metric-status {
             font-size: 0.55rem;
-            margin-top: 4px;
         }
 
         .status-card {
@@ -309,27 +273,7 @@ st.markdown(
 
         .live-badge {
             font-size: 0.58rem;
-            padding: 3px 7px;
         }
-
-        .chart-title {
-            font-size: 0.72rem;
-        }
-
-        [data-testid="stVegaLiteChart"] {
-            width: 100% !important;
-        }
-
-        hr {
-            margin-top: 0.8rem !important;
-            margin-bottom: 0.8rem !important;
-        }
-
-        /*
-        Historical table on phone.
-        All columns still displayed,
-        but text becomes very small.
-        */
 
         .history-table th {
             font-size: 4.7px;
@@ -347,6 +291,94 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+
+# =========================================================
+# LOGIN SETTINGS
+# =========================================================
+
+LOGIN_USERNAME = st.secrets["DASHBOARD_USERNAME"]
+LOGIN_PASSWORD = st.secrets["DASHBOARD_PASSWORD"]
+
+
+# =========================================================
+# SESSION LOGIN STATE
+# =========================================================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+
+# =========================================================
+# LOGIN FUNCTION
+# =========================================================
+
+def login():
+
+    st.markdown(
+        '<div class="login-title">'
+        '🌱 Smart Aquaponic Greenhouse'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="login-subtitle">'
+        'Dashboard Login'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    # Center login form
+    left, middle, right = st.columns(
+        [1, 1.2, 1]
+    )
+
+
+    with middle:
+
+        username = st.text_input(
+            "Username"
+        )
+
+        password = st.text_input(
+            "Password",
+            type="password"
+        )
+
+
+        if st.button(
+            "Login",
+            use_container_width=True
+        ):
+
+            if (
+                username == LOGIN_USERNAME
+                and
+                password == LOGIN_PASSWORD
+            ):
+
+                st.session_state.logged_in = True
+
+                st.rerun()
+
+            else:
+
+                st.error(
+                    "Incorrect username or password."
+                )
+
+
+# =========================================================
+# SHOW LOGIN IF NOT AUTHENTICATED
+# =========================================================
+
+if not st.session_state.logged_in:
+
+    login()
+
+    st.stop()
 
 
 # =========================================================
@@ -397,9 +429,7 @@ def get_container_client():
 # READ BLOB RECORDS
 # =========================================================
 
-def read_blob_records(
-    blobs
-):
+def read_blob_records(blobs):
 
     container_client = (
         get_container_client()
@@ -450,7 +480,6 @@ def read_blob_records(
                         record
                     )
 
-
                 except json.JSONDecodeError:
 
                     pass
@@ -468,9 +497,7 @@ def read_blob_records(
 # PREPARE DATAFRAME
 # =========================================================
 
-def prepare_dataframe(
-    records
-):
+def prepare_dataframe(records):
 
     if len(records) == 0:
 
@@ -489,21 +516,14 @@ def prepare_dataframe(
             errors="coerce"
         )
 
-
         df = df.dropna(
-            subset=[
-                "timestamp"
-            ]
+            subset=["timestamp"]
         )
-
 
         df = df.drop_duplicates(
-            subset=[
-                "timestamp"
-            ],
+            subset=["timestamp"],
             keep="last"
         )
-
 
         df = df.sort_values(
             "timestamp"
@@ -515,8 +535,6 @@ def prepare_dataframe(
 
 # =========================================================
 # LOAD RECENT DATA
-#
-# Live dashboard only
 # =========================================================
 
 def load_recent_data():
@@ -611,9 +629,7 @@ def display_value(
 
     try:
 
-        if pd.isna(
-            value
-        ):
+        if pd.isna(value):
 
             return "N/A"
 
@@ -622,19 +638,14 @@ def display_value(
         pass
 
 
-    return (
-        str(value)
-        + suffix
-    )
+    return str(value) + suffix
 
 
 # =========================================================
 # STATUS VALUE
 # =========================================================
 
-def status_value(
-    value
-):
+def status_value(value):
 
     if value is None:
 
@@ -643,9 +654,7 @@ def status_value(
 
     try:
 
-        if pd.isna(
-            value
-        ):
+        if pd.isna(value):
 
             return "UNKNOWN"
 
@@ -654,18 +663,14 @@ def status_value(
         pass
 
 
-    return str(
-        value
-    ).upper()
+    return str(value).upper()
 
 
 # =========================================================
 # SAFE HTML
 # =========================================================
 
-def safe_text(
-    value
-):
+def safe_text(value):
 
     return html.escape(
         str(value)
@@ -733,15 +738,9 @@ def metric_grid(
         '<div class="'
         + grid_class
         + '">'
+        + "".join(cards)
+        + "</div>"
     )
-
-
-    for card in cards:
-
-        html_code += card
-
-
-    html_code += "</div>"
 
 
     st.markdown(
@@ -752,12 +751,9 @@ def metric_grid(
 
 # =========================================================
 # SIDEBAR
+#
+# No 🌱 Greenhouse title
 # =========================================================
-
-st.sidebar.title(
-    "🌱 Greenhouse"
-)
-
 
 page = st.sidebar.radio(
     "Menu",
@@ -769,7 +765,24 @@ page = st.sidebar.radio(
 
 
 # =========================================================
-# PAGE TITLE
+# LOGOUT
+# =========================================================
+
+st.sidebar.divider()
+
+
+if st.sidebar.button(
+    "Logout",
+    use_container_width=True
+):
+
+    st.session_state.logged_in = False
+
+    st.rerun()
+
+
+# =========================================================
+# MAIN PAGE TITLE
 # =========================================================
 
 st.markdown(
@@ -796,7 +809,7 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # AUTO REFRESH EVERY 1 MINUTE
+    # REFRESH EVERY 1 MINUTE
     # =====================================================
 
     @st.fragment(
@@ -853,9 +866,7 @@ if page == "Live Dashboard":
             ]
 
 
-            if pd.notna(
-                latest_time
-            ):
+            if pd.notna(latest_time):
 
                 record_text = (
                     latest_time.strftime(
@@ -1201,7 +1212,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # PH
+        # PH HISTORY
         # =================================================
 
         if (
@@ -1316,7 +1327,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # REFRESH BUTTON
+    # REFRESH HISTORY
     # =====================================================
 
     if st.button(
@@ -1512,7 +1523,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # FILTERS
+    # STATUS FILTERS
     # =====================================================
 
     filter_col1, filter_col2 = (
@@ -1604,8 +1615,6 @@ elif page == "Historical Data":
 
     # =====================================================
     # TABLE COLUMNS
-    #
-    # Shorter column names help everything fit.
     # =====================================================
 
     preferred_columns = [
@@ -1679,7 +1688,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # SHORT TABLE HEADINGS
+    # SHORT HEADINGS
     # =====================================================
 
     table_df = table_df.rename(
@@ -1750,9 +1759,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # COMPACT FULL WIDTH TABLE
-    #
-    # No horizontal scrolling on desktop.
+    # FULL WIDTH TABLE
     # =====================================================
 
     table_html = (
@@ -1774,7 +1781,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # CSV DOWNLOAD
+    # DOWNLOAD CSV
     # =====================================================
 
     csv_data = (
@@ -1789,9 +1796,7 @@ elif page == "Historical Data":
 
 
     st.download_button(
-        label=(
-            "Download Historical Data CSV"
-        ),
+        label="Download Historical Data CSV",
         data=csv_data,
         file_name=(
             "smart_aquaponic_greenhouse_history.csv"

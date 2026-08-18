@@ -141,7 +141,7 @@ st.markdown(
 
 
     /* =====================================================
-       PAGE TITLE
+       TITLE
        ===================================================== */
 
     .main-title {
@@ -177,20 +177,12 @@ st.markdown(
 
 
     /* =====================================================
-       DASHBOARD GRIDS
+       GRIDS
        ===================================================== */
 
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    .dashboard-grid-3 {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
         width: 100%;
         margin-bottom: 10px;
@@ -218,8 +210,8 @@ st.markdown(
 
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
 
         text-align: center;
     }
@@ -254,17 +246,11 @@ st.markdown(
         text-align: center;
     }
 
-
-    /* NORMAL */
-
     .sensor-normal {
         background-color: rgba(46, 160, 67, 0.14);
         color: #16803a;
         border: 1px solid rgba(46, 160, 67, 0.28);
     }
-
-
-    /* LOW */
 
     .sensor-low {
         background-color: rgba(245, 158, 11, 0.16);
@@ -272,17 +258,11 @@ st.markdown(
         border: 1px solid rgba(245, 158, 11, 0.32);
     }
 
-
-    /* HIGH */
-
     .sensor-high {
         background-color: rgba(220, 53, 69, 0.14);
         color: #b4232d;
         border: 1px solid rgba(220, 53, 69, 0.28);
     }
-
-
-    /* UNKNOWN */
 
     .sensor-unknown {
         background-color: rgba(128, 128, 128, 0.10);
@@ -292,7 +272,7 @@ st.markdown(
 
 
     /* =====================================================
-       CONNECTION STATUS
+       CONNECTION
        ===================================================== */
 
     .status-card {
@@ -317,7 +297,7 @@ st.markdown(
 
 
     /* =====================================================
-       LIVE BADGE
+       LIVE
        ===================================================== */
 
     .live-badge {
@@ -363,11 +343,66 @@ st.markdown(
 
 
     /* =====================================================
-       STREAMLIT DATAFRAME
+       HISTORICAL TABLE
        ===================================================== */
 
-    div[data-testid="stDataFrame"] {
-        text-align: center;
+    .history-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid rgba(128, 128, 128, 0.20);
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+        margin: 0;
+    }
+
+    .history-table th {
+        text-align: center !important;
+        vertical-align: middle !important;
+
+        padding: 12px 8px;
+
+        font-size: 0.82rem;
+        font-weight: 650;
+
+        border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+        border-right: 1px solid rgba(128, 128, 128, 0.15);
+
+        background-color: rgba(128, 128, 128, 0.06);
+
+        white-space: nowrap;
+    }
+
+    .history-table td {
+        text-align: center !important;
+        vertical-align: middle !important;
+
+        padding: 10px 8px;
+
+        font-size: 0.80rem;
+
+        border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+        border-right: 1px solid rgba(128, 128, 128, 0.10);
+
+        white-space: nowrap;
+    }
+
+    .history-table th:last-child,
+    .history-table td:last-child {
+        border-right: none;
+    }
+
+    .history-table tbody tr:nth-child(even) {
+        background-color: rgba(128, 128, 128, 0.025);
+    }
+
+    .history-table tbody tr:hover {
+        background-color: rgba(128, 128, 128, 0.07);
     }
 
 
@@ -381,19 +416,10 @@ st.markdown(
             padding-top: 1rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
-            padding-bottom: 1.2rem;
         }
 
         .main-title {
             font-size: 1.45rem;
-        }
-
-        .sub-title {
-            font-size: 0.67rem;
-        }
-
-        .last-record {
-            font-size: 0.64rem;
         }
 
         .section-title {
@@ -401,7 +427,6 @@ st.markdown(
         }
 
         .dashboard-grid,
-        .dashboard-grid-3,
         .dashboard-grid-2 {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 7px;
@@ -424,21 +449,10 @@ st.markdown(
             font-size: 0.55rem;
         }
 
-        .status-card {
-            padding: 9px 10px;
-            font-size: 0.66rem;
-        }
-
-        .live-badge {
-            font-size: 0.58rem;
-        }
-
-        .countdown-box {
-            font-size: 0.62rem;
-        }
-
-        .chart-title {
-            font-size: 0.72rem;
+        .history-table th,
+        .history-table td {
+            font-size: 0.65rem;
+            padding: 7px 5px;
         }
 
     }
@@ -450,7 +464,7 @@ st.markdown(
 
 
 # =========================================================
-# REFRESH SETTINGS
+# REFRESH
 # =========================================================
 
 REFRESH_SECONDS = 30
@@ -501,7 +515,7 @@ SENSOR_THRESHOLDS = {
 
 
 # =========================================================
-# AZURE STORAGE SETTINGS
+# AZURE SETTINGS
 # =========================================================
 
 STORAGE_ACCOUNT_NAME = st.secrets[
@@ -525,7 +539,7 @@ ACCOUNT_URL = (
 
 
 # =========================================================
-# CONNECT TO AZURE
+# AZURE CONNECTION
 # =========================================================
 
 def get_container_client():
@@ -651,10 +665,7 @@ def prepare_dataframe(records):
         ]
 
 
-    # =====================================================
-    # AZURE HISTORICAL FIELD
-    # =====================================================
-
+    # Azure historical status not sent yet
     if "azure" not in df.columns:
 
         df[
@@ -741,7 +752,7 @@ def load_recent_data():
 
 
 # =========================================================
-# LOAD ALL HISTORICAL DATA
+# HISTORICAL DATA
 # =========================================================
 
 @st.cache_data(
@@ -905,7 +916,7 @@ def sensor_status(
 
 
 # =========================================================
-# SENSOR STATUS CLASS
+# STATUS CLASS
 # =========================================================
 
 def sensor_status_class(status):
@@ -998,12 +1009,6 @@ def metric_grid(
             "dashboard-grid-2"
         )
 
-    elif columns == 3:
-
-        grid_class = (
-            "dashboard-grid-3"
-        )
-
     else:
 
         grid_class = (
@@ -1092,10 +1097,6 @@ def sensor_chart(
     )
 
 
-    # =====================================================
-    # SENSOR READING
-    # =====================================================
-
     reading_chart = (
         alt.Chart(
             chart_df
@@ -1144,10 +1145,6 @@ def sensor_chart(
     )
 
 
-    # =====================================================
-    # LOW THRESHOLD
-    # =====================================================
-
     low_df = pd.DataFrame(
         {
             "threshold": [
@@ -1180,10 +1177,6 @@ def sensor_chart(
     )
 
 
-    # =====================================================
-    # HIGH THRESHOLD
-    # =====================================================
-
     high_df = pd.DataFrame(
         {
             "threshold": [
@@ -1215,10 +1208,6 @@ def sensor_chart(
         )
     )
 
-
-    # =====================================================
-    # LOW LABEL
-    # =====================================================
 
     low_label_df = pd.DataFrame(
         {
@@ -1260,10 +1249,6 @@ def sensor_chart(
         )
     )
 
-
-    # =====================================================
-    # HIGH LABEL
-    # =====================================================
 
     high_label_df = pd.DataFrame(
         {
@@ -1350,7 +1335,7 @@ if st.sidebar.button(
 
 
 # =========================================================
-# PAGE HEADER
+# PAGE TITLE
 # =========================================================
 
 st.markdown(
@@ -1377,10 +1362,7 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # SESSION STATE FOR LIVE DATA
-    #
-    # Streamlit checks every second.
-    # Azure is only read every 30 seconds.
+    # LIVE SESSION DATA
     # =====================================================
 
     if "live_df" not in st.session_state:
@@ -1395,6 +1377,9 @@ if page == "Live Dashboard":
 
     # =====================================================
     # LIVE FRAGMENT
+    #
+    # Checks every second.
+    # Azure only reads every 30 seconds.
     # =====================================================
 
     @st.fragment(
@@ -1402,12 +1387,11 @@ if page == "Live Dashboard":
     )
     def live_dashboard():
 
-
         now = time.time()
 
 
         # =================================================
-        # READ AZURE ONLY WHEN REQUIRED
+        # AZURE UPDATE
         # =================================================
 
         if (
@@ -1480,10 +1464,6 @@ if page == "Live Dashboard":
         )
 
 
-        # =================================================
-        # GET STORED LIVE DATA
-        # =================================================
-
         df = st.session_state.live_df
 
 
@@ -1504,7 +1484,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # LAST SENSOR RECORD
+        # TIMESTAMP
         # =================================================
 
         record_text = "Unknown"
@@ -1528,7 +1508,7 @@ if page == "Live Dashboard":
                 )
 
 
-        status_left, status_right = st.columns(
+        c1, c2 = st.columns(
             [
                 4,
                 1
@@ -1536,7 +1516,7 @@ if page == "Live Dashboard":
         )
 
 
-        with status_left:
+        with c1:
 
             st.markdown(
                 '<div class="last-record">'
@@ -1549,7 +1529,7 @@ if page == "Live Dashboard":
             )
 
 
-        with status_right:
+        with c2:
 
             st.markdown(
                 '<div style="text-align:right;">'
@@ -1562,7 +1542,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # SENSOR STATUS
+        # STATUS
         # =================================================
 
         fish_level_status = sensor_status(
@@ -1774,7 +1754,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # WATER SYSTEM
+        # WATER
         # =================================================
 
         st.divider()
@@ -1861,32 +1841,25 @@ if page == "Live Dashboard":
             )
 
 
-        connection_html = (
-
-            '<div class="dashboard-grid-2">'
-
-
-            '<div class="'
-            + wifi_class
-            + '">'
-            'Wi-Fi: '
-            + safe_text(
-                wifi_status
-            )
-            + '</div>'
-
-
-            '<div class="status-card status-online">'
-            'Azure: ONLINE'
-            '</div>'
-
-
-            '</div>'
-        )
-
-
         st.markdown(
-            connection_html,
+            (
+                '<div class="dashboard-grid-2">'
+
+                '<div class="'
+                + wifi_class
+                + '">'
+                'Wi-Fi: '
+                + safe_text(
+                    wifi_status
+                )
+                + '</div>'
+
+                '<div class="status-card status-online">'
+                'Azure: ONLINE'
+                '</div>'
+
+                '</div>'
+            ),
             unsafe_allow_html=True
         )
 
@@ -1913,10 +1886,6 @@ if page == "Live Dashboard":
         )
 
 
-        # =================================================
-        # ROW 1
-        # =================================================
-
         chart1, chart2 = st.columns(
             2
         )
@@ -1942,10 +1911,6 @@ if page == "Live Dashboard":
             )
 
 
-        # =================================================
-        # ROW 2
-        # =================================================
-
         chart1, chart2 = st.columns(
             2
         )
@@ -1969,10 +1934,6 @@ if page == "Live Dashboard":
                 " °C"
             )
 
-
-        # =================================================
-        # ROW 3
-        # =================================================
 
         chart1, chart2 = st.columns(
             2
@@ -1999,10 +1960,6 @@ if page == "Live Dashboard":
             )
 
 
-        # =================================================
-        # ROW 4
-        # =================================================
-
         sensor_chart(
             df,
             "water_tank_2_level",
@@ -2010,10 +1967,6 @@ if page == "Live Dashboard":
             "%"
         )
 
-
-        # =================================================
-        # FOOTER
-        # =================================================
 
         st.caption(
             "Data source: "
@@ -2050,7 +2003,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # REFRESH HISTORICAL DATA
+    # REFRESH BUTTON
     # =====================================================
 
     if st.button(
@@ -2063,7 +2016,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # LOAD HISTORICAL DATA
+    # LOAD DATA
     # =====================================================
 
     try:
@@ -2224,16 +2177,12 @@ elif page == "Historical Data":
         ):
 
             start_date = (
-                selected_dates[
-                    0
-                ]
+                selected_dates[0]
             )
 
 
             end_date = (
-                selected_dates[
-                    1
-                ]
+                selected_dates[1]
             )
 
 
@@ -2257,17 +2206,14 @@ elif page == "Historical Data":
     # =====================================================
     # IMPORTANT HISTORICAL COLUMNS
     #
-    # ORDER:
-    #
-    # GREENHOUSE
-    # FISH
-    # WATER
-    # CONNECTION
+    # Greenhouse
+    # Fish
+    # Tanks
+    # Connection
     # =====================================================
 
     preferred_columns = [
 
-        # Time
         "timestamp",
 
         # Greenhouse
@@ -2317,10 +2263,7 @@ elif page == "Historical Data":
     # SORT NEWEST FIRST
     # =====================================================
 
-    if (
-        "timestamp"
-        in table_df.columns
-    ):
+    if "timestamp" in table_df.columns:
 
         table_df = table_df.sort_values(
             "timestamp",
@@ -2341,7 +2284,49 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # SHORT COLUMN NAMES
+    # FORMAT NUMBERS
+    # =====================================================
+
+    if (
+        "ph"
+        in table_df.columns
+    ):
+
+        table_df[
+            "ph"
+        ] = table_df[
+            "ph"
+        ].apply(
+            lambda value:
+                (
+                    f"{float(value):.1f}"
+                    if pd.notna(value)
+                    else "N/A"
+                )
+        )
+
+
+    if (
+        "greenhouse_temperature"
+        in table_df.columns
+    ):
+
+        table_df[
+            "greenhouse_temperature"
+        ] = table_df[
+            "greenhouse_temperature"
+        ].apply(
+            lambda value:
+                (
+                    f"{float(value):g}"
+                    if pd.notna(value)
+                    else "N/A"
+                )
+        )
+
+
+    # =====================================================
+    # COLUMN NAMES
     # =====================================================
 
     table_df = table_df.rename(
@@ -2403,57 +2388,22 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # CENTRE HISTORICAL TABLE
+    # FULLY CENTRED HTML TABLE
     # =====================================================
 
-    centered_table = (
-
-        table_df.style
-
-        .set_properties(
-            **{
-                "text-align":
-                    "center"
-            }
-        )
-
-        .set_table_styles(
-            [
-
-                {
-                    "selector":
-                        "th",
-
-                    "props": [
-                        (
-                            "text-align",
-                            "center"
-                        )
-                    ]
-                },
-
-                {
-                    "selector":
-                        "td",
-
-                    "props": [
-                        (
-                            "text-align",
-                            "center"
-                        )
-                    ]
-                }
-
-            ]
-        )
-
+    table_html = table_df.to_html(
+        index=False,
+        classes="history-table",
+        border=0,
+        escape=True
     )
 
 
-    st.dataframe(
-        centered_table,
-        use_container_width=True,
-        hide_index=True
+    st.markdown(
+        '<div class="history-wrapper">'
+        + table_html
+        + '</div>',
+        unsafe_allow_html=True
     )
 
 

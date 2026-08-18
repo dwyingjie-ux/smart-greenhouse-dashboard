@@ -20,9 +20,9 @@ st.set_page_config(
 # AZURE STORAGE SETTINGS
 # =========================================================
 
-STORAGE_ACCOUNT_NAME = "smartgreenhousestorage"
+STORAGE_ACCOUNT_NAME = st.secrets["STORAGE_ACCOUNT_NAME"]
 
-CONTAINER_NAME = "greenhouse-final"
+CONTAINER_NAME = st.secrets["CONTAINER_NAME"]
 
 
 # =========================================================
@@ -31,7 +31,7 @@ CONTAINER_NAME = "greenhouse-final"
 # Paste your Azure Storage Account Key below.
 # =========================================================
 
-STORAGE_ACCOUNT_KEY = ""
+STORAGE_ACCOUNT_KEY = st.secrets["STORAGE_ACCOUNT_KEY"]
 
 
 # =========================================================

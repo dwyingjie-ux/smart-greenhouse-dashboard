@@ -434,11 +434,11 @@ st.markdown(
 # REFRESH SETTINGS
 # =========================================================
 
-REFRESH_SECONDS = 60
+REFRESH_SECONDS = 30
 
 
 # =========================================================
-# STREAMLIT SENSOR THRESHOLDS
+# SENSOR THRESHOLDS
 # =========================================================
 
 SENSOR_THRESHOLDS = {
@@ -562,6 +562,7 @@ def read_blob_records(
 
                 line = line.strip()
 
+
                 if not line:
                     continue
 
@@ -640,6 +641,20 @@ def prepare_dataframe(
 
 
     # =====================================================
+    # AZURE FIELD
+    #
+    # Do NOT fake an Azure connection status.
+    # If ESP32 does not send this field yet, show N/A.
+    # =====================================================
+
+    if "azure" not in df.columns:
+
+        df[
+            "azure"
+        ] = "N/A"
+
+
+    # =====================================================
     # TIMESTAMP
     # =====================================================
 
@@ -706,7 +721,9 @@ def load_recent_data():
     )
 
 
-    recent_blobs = blobs[:20]
+    recent_blobs = blobs[
+        :20
+    ]
 
 
     records = read_blob_records(
@@ -720,7 +737,7 @@ def load_recent_data():
 
 
 # =========================================================
-# LOAD HISTORICAL DATA
+# LOAD ALL HISTORICAL DATA
 # =========================================================
 
 @st.cache_data(
@@ -906,7 +923,7 @@ def sensor_status(
 
 
 # =========================================================
-# SENSOR STATUS CSS
+# SENSOR STATUS CLASS
 # =========================================================
 
 def sensor_status_class(
@@ -1007,11 +1024,13 @@ def metric_grid(
             "dashboard-grid-2"
         )
 
+
     elif columns == 3:
 
         grid_class = (
             "dashboard-grid-3"
         )
+
 
     else:
 
@@ -1106,7 +1125,7 @@ def sensor_chart(
 
 
     # =====================================================
-    # ACTUAL SENSOR READING
+    # SENSOR READING
     # =====================================================
 
     reading_chart = (
@@ -1158,7 +1177,7 @@ def sensor_chart(
 
 
     # =====================================================
-    # LOW THRESHOLD
+    # LOW LINE
     # =====================================================
 
     low_df = pd.DataFrame(
@@ -1196,7 +1215,7 @@ def sensor_chart(
 
 
     # =====================================================
-    # HIGH THRESHOLD
+    # HIGH LINE
     # =====================================================
 
     high_df = pd.DataFrame(
@@ -1405,7 +1424,7 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # INITIAL COUNTDOWN TIME
+    # COUNTDOWN INITIAL VALUE
     # =====================================================
 
     if (
@@ -1422,10 +1441,10 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # COUNTDOWN
+    # COUNTDOWN TIMER
     #
-    # This reruns every 1 second.
-    # It DOES NOT read Azure.
+    # Runs every second.
+    # Does NOT connect to Azure every second.
     # =====================================================
 
     @st.fragment(
@@ -1474,13 +1493,13 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # LIVE DASHBOARD
+    # LIVE DATA
     #
-    # Azure is read every 30 seconds only.
+    # Azure read every 30 seconds.
     # =====================================================
 
     @st.fragment(
-        run_every="60s"
+        run_every="30s"
     )
     def live_dashboard():
 
@@ -1498,7 +1517,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # LOAD AZURE
+        # LOAD AZURE DATA
         # =================================================
 
         try:
@@ -1538,7 +1557,7 @@ if page == "Live Dashboard":
 
 
         # =================================================
-        # TIMESTAMP
+        # RECORD TIMESTAMP
         # =================================================
 
         record_text = (
@@ -1564,13 +1583,11 @@ if page == "Live Dashboard":
                 )
 
 
-        status_left, status_right = (
-            st.columns(
-                [
-                    4,
-                    1
-                ]
-            )
+        status_left, status_right = st.columns(
+            [
+                4,
+                1
+            ]
         )
 
 
@@ -1627,23 +1644,19 @@ if page == "Live Dashboard":
         )
 
 
-        greenhouse_temperature_status = (
-            sensor_status(
-                latest.get(
-                    "greenhouse_temperature"
-                ),
+        greenhouse_temperature_status = sensor_status(
+            latest.get(
                 "greenhouse_temperature"
-            )
+            ),
+            "greenhouse_temperature"
         )
 
 
-        soil_moisture_status = (
-            sensor_status(
-                latest.get(
-                    "soil_moisture"
-                ),
+        soil_moisture_status = sensor_status(
+            latest.get(
                 "soil_moisture"
-            )
+            ),
+            "soil_moisture"
         )
 
 
@@ -2051,7 +2064,7 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # RUN BOTH FRAGMENTS
+    # RUN LIVE COMPONENTS
     # =====================================================
 
     countdown_timer()
@@ -2078,12 +2091,12 @@ elif page == "Historical Data":
 
 
     st.caption(
-        "All available IoT records stored in Azure Blob Storage."
+        "Important greenhouse, fish, water and connection records."
     )
 
 
     # =====================================================
-    # REFRESH
+    # REFRESH HISTORICAL DATA
     # =====================================================
 
     if st.button(
@@ -2095,7 +2108,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # LOAD HISTORY
+    # LOAD HISTORICAL DATA
     # =====================================================
 
     try:
@@ -2236,11 +2249,14 @@ elif page == "Historical Data":
 
         selected_dates = st.date_input(
             "Filter by Date",
+
             value=(
                 minimum_date,
                 maximum_date
             ),
+
             min_value=minimum_date,
+
             max_value=maximum_date
         )
 
@@ -2262,6 +2278,7 @@ elif page == "Historical Data":
                 ]
             )
 
+
             end_date = (
                 selected_dates[
                     1
@@ -2269,48 +2286,77 @@ elif page == "Historical Data":
             )
 
 
-            filtered_df = (
-                filtered_df[
-                    (
-                        filtered_df[
-                            "timestamp"
-                        ].dt.date
-                        >= start_date
-                    )
-                    &
-                    (
-                        filtered_df[
-                            "timestamp"
-                        ].dt.date
-                        <= end_date
-                    )
-                ]
-            )
+            filtered_df = filtered_df[
+                (
+                    filtered_df[
+                        "timestamp"
+                    ].dt.date
+                    >= start_date
+                )
+                &
+                (
+                    filtered_df[
+                        "timestamp"
+                    ].dt.date
+                    <= end_date
+                )
+            ]
 
 
     # =====================================================
-    # TABLE COLUMNS
+    # IMPORTANT HISTORICAL COLUMNS
+    #
+    # ORDER:
+    #
+    # 1. Timestamp
+    # 2. Greenhouse
+    # 3. Fish / Aquaponics
+    # 4. Water Tanks
+    # 5. Connection
     # =====================================================
 
     preferred_columns = [
 
+        # -------------------------------------------------
+        # TIME
+        # -------------------------------------------------
+
         "timestamp",
 
-        "fish_tank_level",
-        "fish_temperature",
-        "ph",
-        "fish_refill_pump",
+
+        # -------------------------------------------------
+        # GREENHOUSE
+        # -------------------------------------------------
 
         "greenhouse_temperature",
         "soil_moisture",
-        "greenhouse_pump",
         "fan",
+        "greenhouse_pump",
+
+
+        # -------------------------------------------------
+        # FISH / AQUAPONICS
+        # -------------------------------------------------
+
+        "fish_tank_level",
+        "ph",
+        "fish_refill_pump",
+
+
+        # -------------------------------------------------
+        # WATER TANKS
+        # -------------------------------------------------
 
         "water_tank_1_level",
         "water_tank_2_level",
 
-        "dht_status",
-        "wifi"
+
+        # -------------------------------------------------
+        # CONNECTION
+        # -------------------------------------------------
+
+        "wifi",
+        "azure"
 
     ]
 
@@ -2337,63 +2383,6 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # ADD SENSOR STATUS
-    # =====================================================
-
-    sensor_columns = {
-
-        "fish_tank_level":
-            "Fish Tank Status",
-
-        "fish_temperature":
-            "Fish Temp Status",
-
-        "ph":
-            "pH Status",
-
-        "greenhouse_temperature":
-            "GH Temp Status",
-
-        "soil_moisture":
-            "Soil Status",
-
-        "water_tank_1_level":
-            "Tank 1 Status",
-
-        "water_tank_2_level":
-            "Tank 2 Status"
-
-    }
-
-
-    for (
-        sensor_name,
-        status_column
-    ) in sensor_columns.items():
-
-        if (
-            sensor_name
-            in table_df.columns
-        ):
-
-            table_df[
-                status_column
-            ] = table_df[
-                sensor_name
-            ].apply(
-
-                lambda value,
-                sensor=sensor_name:
-
-                    sensor_status(
-                        value,
-                        sensor
-                    )
-
-            )
-
-
-    # =====================================================
     # SORT NEWEST FIRST
     # =====================================================
 
@@ -2402,11 +2391,9 @@ elif page == "Historical Data":
         in table_df.columns
     ):
 
-        table_df = (
-            table_df.sort_values(
-                "timestamp",
-                ascending=False
-            )
+        table_df = table_df.sort_values(
+            "timestamp",
+            ascending=False
         )
 
 
@@ -2423,26 +2410,23 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # SHORT NAMES
+    # SHORT COLUMN NAMES
     # =====================================================
 
     table_df = table_df.rename(
         columns={
 
+            # ---------------------------------------------
+            # TIME
+            # ---------------------------------------------
+
             "timestamp":
                 "Timestamp",
 
-            "fish_tank_level":
-                "Fish Tank",
 
-            "fish_temperature":
-                "Fish Temp",
-
-            "ph":
-                "pH",
-
-            "fish_refill_pump":
-                "Refill",
+            # ---------------------------------------------
+            # GREENHOUSE
+            # ---------------------------------------------
 
             "greenhouse_temperature":
                 "GH Temp",
@@ -2450,11 +2434,30 @@ elif page == "Historical Data":
             "soil_moisture":
                 "Soil",
 
+            "fan":
+                "Fan",
+
             "greenhouse_pump":
                 "GH Pump",
 
-            "fan":
-                "Fan",
+
+            # ---------------------------------------------
+            # FISH
+            # ---------------------------------------------
+
+            "fish_tank_level":
+                "Fish Tank",
+
+            "ph":
+                "pH",
+
+            "fish_refill_pump":
+                "Refill Pump",
+
+
+            # ---------------------------------------------
+            # WATER
+            # ---------------------------------------------
 
             "water_tank_1_level":
                 "Tank 1",
@@ -2462,11 +2465,16 @@ elif page == "Historical Data":
             "water_tank_2_level":
                 "Tank 2",
 
-            "dht_status":
-                "Temp Sensor",
+
+            # ---------------------------------------------
+            # CONNECTION
+            # ---------------------------------------------
 
             "wifi":
-                "Wi-Fi"
+                "Wi-Fi",
+
+            "azure":
+                "Azure"
 
         }
     )
@@ -2488,7 +2496,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # TABLE
+    # HISTORICAL TABLE
     # =====================================================
 
     st.dataframe(
@@ -2517,10 +2525,13 @@ elif page == "Historical Data":
         label=(
             "Download Historical Data CSV"
         ),
+
         data=csv_data,
+
         file_name=(
             "smart_aquaponic_greenhouse_history.csv"
         ),
+
         mime="text/csv"
     )
 

@@ -1,5 +1,6 @@
 import json
 import html
+from datetime import date
 
 import pandas as pd
 import streamlit as st
@@ -30,7 +31,7 @@ st.markdown(
        ===================================================== */
 
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1.8rem;
         padding-bottom: 2rem;
         max-width: 1400px;
     }
@@ -177,7 +178,7 @@ st.markdown(
 
 
     /* =====================================================
-       CHART HEADINGS
+       CHART TITLE
        ===================================================== */
 
     .chart-title {
@@ -189,7 +190,19 @@ st.markdown(
 
 
     /* =====================================================
-       PHONE LAYOUT
+       HISTORY INFORMATION
+       ===================================================== */
+
+    .history-info {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 0.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+
+    /* =====================================================
+       PHONE
        ===================================================== */
 
     @media (max-width: 768px) {
@@ -219,10 +232,6 @@ st.markdown(
             margin-top: 0.65rem;
             margin-bottom: 0.45rem;
         }
-
-        /*
-        Two cards per row on mobile.
-        */
 
         .dashboard-grid,
         .dashboard-grid-3,
@@ -265,8 +274,16 @@ st.markdown(
             font-size: 0.72rem;
         }
 
+        .history-info {
+            font-size: 0.65rem;
+        }
+
         [data-testid="stVegaLiteChart"] {
             width: 100% !important;
+        }
+
+        [data-testid="stDataFrame"] {
+            font-size: 0.65rem;
         }
 
         hr {
@@ -330,35 +347,19 @@ def get_container_client():
 
 
 # =========================================================
-# LOAD DATA FROM AZURE
+# READ BLOBS
 # =========================================================
 
-def load_data():
+def read_blob_records(blobs):
 
-    container_client = get_container_client()
-
-    blobs = list(
-        container_client.list_blobs()
+    container_client = (
+        get_container_client()
     )
-
-    if len(blobs) == 0:
-        return pd.DataFrame()
-
-
-    # Newest blobs first
-    blobs.sort(
-        key=lambda blob: blob.last_modified,
-        reverse=True
-    )
-
-
-    # Read recent blobs only
-    recent_blobs = blobs[:20]
 
     records = []
 
 
-    for blob in recent_blobs:
+    for blob in blobs:
 
         try:
 
@@ -384,6 +385,7 @@ def load_data():
                 line = line.strip()
 
                 if not line:
+
                     continue
 
 
@@ -398,14 +400,26 @@ def load_data():
                     )
 
                 except json.JSONDecodeError:
+
                     pass
 
 
         except Exception:
+
             pass
 
 
+    return records
+
+
+# =========================================================
+# PREPARE DATAFRAME
+# =========================================================
+
+def prepare_dataframe(records):
+
     if len(records) == 0:
+
         return pd.DataFrame()
 
 
@@ -413,10 +427,6 @@ def load_data():
         records
     )
 
-
-    # =====================================================
-    # SENSOR TIMESTAMP
-    # =====================================================
 
     if "timestamp" in df.columns:
 
@@ -426,11 +436,15 @@ def load_data():
         )
 
         df = df.dropna(
-            subset=["timestamp"]
+            subset=[
+                "timestamp"
+            ]
         )
 
         df = df.drop_duplicates(
-            subset=["timestamp"],
+            subset=[
+                "timestamp"
+            ],
             keep="last"
         )
 
@@ -443,7 +457,89 @@ def load_data():
 
 
 # =========================================================
-# DISPLAY VALUE
+# LOAD RECENT DATA
+#
+# Used by Live Dashboard
+# =========================================================
+
+def load_recent_data():
+
+    container_client = (
+        get_container_client()
+    )
+
+    blobs = list(
+        container_client.list_blobs()
+    )
+
+
+    if len(blobs) == 0:
+
+        return pd.DataFrame()
+
+
+    blobs.sort(
+        key=lambda blob: blob.last_modified,
+        reverse=True
+    )
+
+
+    recent_blobs = blobs[:20]
+
+
+    records = read_blob_records(
+        recent_blobs
+    )
+
+
+    return prepare_dataframe(
+        records
+    )
+
+
+# =========================================================
+# LOAD ALL HISTORICAL DATA
+#
+# Used only on Historical Data page.
+# =========================================================
+
+@st.cache_data(
+    ttl=300,
+    show_spinner=False
+)
+def load_all_data():
+
+    container_client = (
+        get_container_client()
+    )
+
+    blobs = list(
+        container_client.list_blobs()
+    )
+
+
+    if len(blobs) == 0:
+
+        return pd.DataFrame()
+
+
+    blobs.sort(
+        key=lambda blob: blob.last_modified
+    )
+
+
+    records = read_blob_records(
+        blobs
+    )
+
+
+    return prepare_dataframe(
+        records
+    )
+
+
+# =========================================================
+# VALUE HELPERS
 # =========================================================
 
 def display_value(
@@ -452,39 +548,54 @@ def display_value(
 ):
 
     if value is None:
+
         return "N/A"
+
 
     try:
 
-        if pd.isna(value):
+        if pd.isna(
+            value
+        ):
+
             return "N/A"
 
     except Exception:
+
         pass
 
 
-    return str(value) + suffix
+    return (
+        str(value)
+        + suffix
+    )
 
 
-# =========================================================
-# STATUS VALUE
-# =========================================================
-
-def status_value(value):
+def status_value(
+    value
+):
 
     if value is None:
+
         return "UNKNOWN"
+
 
     try:
 
-        if pd.isna(value):
+        if pd.isna(
+            value
+        ):
+
             return "UNKNOWN"
 
     except Exception:
+
         pass
 
 
-    return str(value).upper()
+    return str(
+        value
+    ).upper()
 
 
 # =========================================================
@@ -509,6 +620,7 @@ def metric_card(
 ):
 
     status_html = ""
+
 
     if status is not None:
 
@@ -542,12 +654,15 @@ def metric_grid(
 ):
 
     if columns == 2:
+
         grid_class = "dashboard-grid-2"
 
     elif columns == 3:
+
         grid_class = "dashboard-grid-3"
 
     else:
+
         grid_class = "dashboard-grid"
 
 
@@ -559,6 +674,7 @@ def metric_grid(
 
 
     for card in cards:
+
         html_code += card
 
 
@@ -569,6 +685,23 @@ def metric_grid(
         html_code,
         unsafe_allow_html=True
     )
+
+
+# =========================================================
+# SIDEBAR
+# =========================================================
+
+st.sidebar.title(
+    "🌱 Greenhouse"
+)
+
+page = st.sidebar.radio(
+    "Menu",
+    [
+        "Live Dashboard",
+        "Historical Data"
+    ]
+)
 
 
 # =========================================================
@@ -584,513 +717,1014 @@ st.markdown(
 
 st.markdown(
     '<div class="sub-title">'
-    'Azure IoT Live Monitoring Dashboard'
+    'Azure IoT Monitoring Dashboard'
     '</div>',
     unsafe_allow_html=True
 )
 
 
 # =========================================================
-# LIVE DASHBOARD
-#
-# Checks Azure once every 1 minute.
+# LIVE DASHBOARD PAGE
 # =========================================================
 
-@st.fragment(
-    run_every="60s"
-)
-def live_dashboard():
+if page == "Live Dashboard":
 
 
     # =====================================================
-    # LOAD AZURE DATA
+    # LIVE FRAGMENT
+    #
+    # Refresh every 1 minute
+    # =====================================================
+
+    @st.fragment(
+        run_every="60s"
+    )
+    def live_dashboard():
+
+
+        try:
+
+            df = load_recent_data()
+
+
+        except Exception as e:
+
+            st.error(
+                "Unable to connect to Azure Blob Storage."
+            )
+
+            st.code(
+                str(e)
+            )
+
+            return
+
+
+        if df.empty:
+
+            st.warning(
+                "No greenhouse data found in Azure Blob Storage."
+            )
+
+            return
+
+
+        # =================================================
+        # LATEST RECORD
+        # =================================================
+
+        latest = df.iloc[-1]
+
+
+        # =================================================
+        # RECORD TIMESTAMP
+        # =================================================
+
+        record_text = "Unknown"
+
+
+        if "timestamp" in df.columns:
+
+            latest_time = latest[
+                "timestamp"
+            ]
+
+
+            if pd.notna(
+                latest_time
+            ):
+
+                record_text = (
+                    latest_time.strftime(
+                        "%d/%m/%Y %H:%M:%S"
+                    )
+                )
+
+
+        status_left, status_right = st.columns(
+            [4, 1]
+        )
+
+
+        with status_left:
+
+            st.markdown(
+                '<div class="last-record">'
+                'Last Sensor Record: '
+                + safe_text(record_text)
+                + '</div>',
+                unsafe_allow_html=True
+            )
+
+
+        with status_right:
+
+            st.markdown(
+                '<div style="text-align:right;">'
+                '<span class="live-badge">'
+                '● LIVE'
+                '</span>'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+
+        # =================================================
+        # AQUAPONICS
+        # =================================================
+
+        st.divider()
+
+        st.markdown(
+            '<div class="section-title">'
+            'Aquaponics'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+
+        ph_status = status_value(
+            latest.get(
+                "ph_alert"
+            )
+        )
+
+
+        aquaponics_cards = [
+
+            metric_card(
+                "Fish Tank Level",
+                display_value(
+                    latest.get(
+                        "fish_tank_level"
+                    ),
+                    "%"
+                )
+            ),
+
+            metric_card(
+                "Fish Temperature",
+                display_value(
+                    latest.get(
+                        "fish_temperature"
+                    ),
+                    " °C"
+                )
+            ),
+
+            metric_card(
+                "pH",
+                display_value(
+                    latest.get(
+                        "ph"
+                    )
+                ),
+                "Status: " + ph_status
+            ),
+
+            metric_card(
+                "Fish Refill Pump",
+                status_value(
+                    latest.get(
+                        "fish_refill_pump"
+                    )
+                )
+            )
+
+        ]
+
+
+        metric_grid(
+            aquaponics_cards,
+            4
+        )
+
+
+        # =================================================
+        # GREENHOUSE
+        # =================================================
+
+        st.divider()
+
+        st.markdown(
+            '<div class="section-title">'
+            'Greenhouse'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+
+        greenhouse_cards = [
+
+            metric_card(
+                "Temperature",
+                display_value(
+                    latest.get(
+                        "greenhouse_temperature"
+                    ),
+                    " °C"
+                )
+            ),
+
+            metric_card(
+                "Soil Moisture",
+                display_value(
+                    latest.get(
+                        "soil_moisture"
+                    ),
+                    "%"
+                )
+            ),
+
+            metric_card(
+                "Greenhouse Pump",
+                status_value(
+                    latest.get(
+                        "greenhouse_pump"
+                    )
+                )
+            ),
+
+            metric_card(
+                "Fan",
+                status_value(
+                    latest.get(
+                        "fan"
+                    )
+                )
+            )
+
+        ]
+
+
+        metric_grid(
+            greenhouse_cards,
+            4
+        )
+
+
+        # =================================================
+        # WATER SYSTEM
+        # =================================================
+
+        st.divider()
+
+        st.markdown(
+            '<div class="section-title">'
+            'Water System'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+
+        water_cards = [
+
+            metric_card(
+                "Water Tank 1",
+                display_value(
+                    latest.get(
+                        "water_tank_1_level"
+                    ),
+                    "%"
+                )
+            ),
+
+            metric_card(
+                "Water Tank 2",
+                display_value(
+                    latest.get(
+                        "water_tank_2_level"
+                    ),
+                    "%"
+                )
+            ),
+
+            metric_card(
+                "Water Status",
+                status_value(
+                    latest.get(
+                        "water_alert"
+                    )
+                )
+            )
+
+        ]
+
+
+        metric_grid(
+            water_cards,
+            3
+        )
+
+
+        # =================================================
+        # CONNECTION
+        # =================================================
+
+        st.divider()
+
+        st.markdown(
+            '<div class="section-title">'
+            'Connection'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+
+        wifi_status = status_value(
+            latest.get(
+                "wifi"
+            )
+        )
+
+
+        if wifi_status == "ONLINE":
+
+            wifi_class = (
+                "status-card status-online"
+            )
+
+        else:
+
+            wifi_class = (
+                "status-card status-offline"
+            )
+
+
+        connection_html = (
+
+            '<div class="dashboard-grid-2">'
+
+            '<div class="'
+            + wifi_class
+            + '">'
+            'Wi-Fi: '
+            + safe_text(
+                wifi_status
+            )
+            + '</div>'
+
+            '<div class="status-card status-online">'
+            'Azure: ONLINE'
+            '</div>'
+
+            '</div>'
+        )
+
+
+        st.markdown(
+            connection_html,
+            unsafe_allow_html=True
+        )
+
+
+        # =================================================
+        # SENSOR HISTORY
+        # =================================================
+
+        st.divider()
+
+        st.markdown(
+            '<div class="section-title">'
+            'Sensor History'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+
+        # =================================================
+        # TEMPERATURE CHART
+        # =================================================
+
+        if (
+            "timestamp" in df.columns
+            and
+            "greenhouse_temperature" in df.columns
+        ):
+
+            st.markdown(
+                '<div class="chart-title">'
+                'Greenhouse Temperature'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+
+            temperature_chart = (
+                df[
+                    [
+                        "timestamp",
+                        "greenhouse_temperature"
+                    ]
+                ]
+                .dropna()
+                .set_index(
+                    "timestamp"
+                )
+            )
+
+
+            st.line_chart(
+                temperature_chart,
+                use_container_width=True
+            )
+
+
+        # =================================================
+        # PH CHART
+        # =================================================
+
+        if (
+            "timestamp" in df.columns
+            and
+            "ph" in df.columns
+        ):
+
+            st.markdown(
+                '<div class="chart-title">'
+                'pH Level'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+
+            ph_chart = (
+                df[
+                    [
+                        "timestamp",
+                        "ph"
+                    ]
+                ]
+                .dropna()
+                .set_index(
+                    "timestamp"
+                )
+            )
+
+
+            st.line_chart(
+                ph_chart,
+                use_container_width=True
+            )
+
+
+        # =================================================
+        # SOIL MOISTURE CHART
+        # =================================================
+
+        if (
+            "timestamp" in df.columns
+            and
+            "soil_moisture" in df.columns
+        ):
+
+            st.markdown(
+                '<div class="chart-title">'
+                'Soil Moisture'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+
+            soil_chart = (
+                df[
+                    [
+                        "timestamp",
+                        "soil_moisture"
+                    ]
+                ]
+                .dropna()
+                .set_index(
+                    "timestamp"
+                )
+            )
+
+
+            st.line_chart(
+                soil_chart,
+                use_container_width=True
+            )
+
+
+        # =================================================
+        # FOOTER
+        # =================================================
+
+        st.caption(
+            "Data source: "
+            "Azure IoT Hub → "
+            "Stream Analytics → "
+            "Azure Blob Storage"
+        )
+
+
+    # =====================================================
+    # RUN LIVE DASHBOARD
+    # =====================================================
+
+    live_dashboard()
+
+
+# =========================================================
+# HISTORICAL DATA PAGE
+# =========================================================
+
+elif page == "Historical Data":
+
+
+    st.divider()
+
+    st.markdown(
+        '<div class="section-title">'
+        'Historical Sensor Data'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    st.markdown(
+        '<div class="history-info">'
+        'All available IoT records stored in '
+        'Azure Blob Storage.'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    # =====================================================
+    # MANUAL RELOAD BUTTON
+    # =====================================================
+
+    if st.button(
+        "Refresh Historical Data"
+    ):
+
+        st.cache_data.clear()
+
+        st.rerun()
+
+
+    # =====================================================
+    # LOAD ALL DATA
     # =====================================================
 
     try:
 
-        df = load_data()
+        with st.spinner(
+            "Loading historical data from Azure..."
+        ):
+
+            history_df = (
+                load_all_data()
+            )
+
 
     except Exception as e:
 
         st.error(
-            "Unable to connect to Azure Blob Storage."
+            "Unable to load historical data."
         )
 
         st.code(
             str(e)
         )
 
-        return
+        st.stop()
 
 
-    if df.empty:
+    # =====================================================
+    # NO DATA
+    # =====================================================
+
+    if history_df.empty:
 
         st.warning(
-            "No greenhouse data found in Azure Blob Storage."
+            "No historical records found."
         )
 
-        return
+        st.stop()
 
 
     # =====================================================
-    # LATEST SENSOR RECORD
+    # SUMMARY
     # =====================================================
 
-    latest = df.iloc[-1]
+    total_records = len(
+        history_df
+    )
 
 
-    # =====================================================
-    # SENSOR RECORD TIMESTAMP
-    # =====================================================
-
-    record_text = "Unknown"
-
-
-    if "timestamp" in df.columns:
-
-        latest_time = latest[
+    first_record = (
+        history_df[
             "timestamp"
-        ]
-
-        if pd.notna(latest_time):
-
-            record_text = (
-                latest_time.strftime(
-                    "%d/%m/%Y %H:%M:%S"
-                )
-            )
-
-
-    status_left, status_right = st.columns(
-        [4, 1]
+        ].min()
+        if "timestamp" in history_df.columns
+        else None
     )
 
 
-    with status_left:
-
-        st.markdown(
-            '<div class="last-record">'
-            'Last Sensor Record: '
-            + safe_text(record_text)
-            + '</div>',
-            unsafe_allow_html=True
-        )
-
-
-    with status_right:
-
-        st.markdown(
-            '<div style="text-align:right;">'
-            '<span class="live-badge">'
-            '● LIVE'
-            '</span>'
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-
-    # =====================================================
-    # AQUAPONICS
-    # =====================================================
-
-    st.divider()
-
-    st.markdown(
-        '<div class="section-title">'
-        'Aquaponics'
-        '</div>',
-        unsafe_allow_html=True
+    latest_record = (
+        history_df[
+            "timestamp"
+        ].max()
+        if "timestamp" in history_df.columns
+        else None
     )
 
 
-    ph_status = status_value(
-        latest.get(
-            "ph_alert"
-        )
-    )
-
-
-    aquaponics_cards = [
-
-        metric_card(
-            "Fish Tank Level",
-            display_value(
-                latest.get(
-                    "fish_tank_level"
-                ),
-                "%"
-            )
-        ),
-
-        metric_card(
-            "Fish Temperature",
-            display_value(
-                latest.get(
-                    "fish_temperature"
-                ),
-                " °C"
-            )
-        ),
-
-        metric_card(
-            "pH",
-            display_value(
-                latest.get(
-                    "ph"
-                )
-            ),
-            "Status: " + ph_status
-        ),
-
-        metric_card(
-            "Fish Refill Pump",
-            status_value(
-                latest.get(
-                    "fish_refill_pump"
-                )
-            )
-        )
-
-    ]
-
-
-    metric_grid(
-        aquaponics_cards,
-        4
-    )
-
-
-    # =====================================================
-    # GREENHOUSE
-    # =====================================================
-
-    st.divider()
-
-    st.markdown(
-        '<div class="section-title">'
-        'Greenhouse'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
-    greenhouse_cards = [
-
-        metric_card(
-            "Temperature",
-            display_value(
-                latest.get(
-                    "greenhouse_temperature"
-                ),
-                " °C"
-            )
-        ),
-
-        metric_card(
-            "Soil Moisture",
-            display_value(
-                latest.get(
-                    "soil_moisture"
-                ),
-                "%"
-            )
-        ),
-
-        metric_card(
-            "Greenhouse Pump",
-            status_value(
-                latest.get(
-                    "greenhouse_pump"
-                )
-            )
-        ),
-
-        metric_card(
-            "Fan",
-            status_value(
-                latest.get(
-                    "fan"
-                )
-            )
-        )
-
-    ]
-
-
-    metric_grid(
-        greenhouse_cards,
-        4
-    )
-
-
-    # =====================================================
-    # WATER SYSTEM
-    # =====================================================
-
-    st.divider()
-
-    st.markdown(
-        '<div class="section-title">'
-        'Water System'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
-    water_cards = [
-
-        metric_card(
-            "Water Tank 1",
-            display_value(
-                latest.get(
-                    "water_tank_1_level"
-                ),
-                "%"
-            )
-        ),
-
-        metric_card(
-            "Water Tank 2",
-            display_value(
-                latest.get(
-                    "water_tank_2_level"
-                ),
-                "%"
-            )
-        ),
-
-        metric_card(
-            "Water Status",
-            status_value(
-                latest.get(
-                    "water_alert"
-                )
-            )
-        )
-
-    ]
-
-
-    metric_grid(
-        water_cards,
+    col1, col2, col3 = st.columns(
         3
     )
 
 
+    with col1:
+
+        st.metric(
+            "Total Records",
+            total_records
+        )
+
+
+    with col2:
+
+        if first_record is not None:
+
+            st.metric(
+                "Oldest Record",
+                first_record.strftime(
+                    "%d/%m/%Y %H:%M"
+                )
+            )
+
+
+    with col3:
+
+        if latest_record is not None:
+
+            st.metric(
+                "Latest Record",
+                latest_record.strftime(
+                    "%d/%m/%Y %H:%M"
+                )
+            )
+
+
     # =====================================================
-    # CONNECTION
+    # DATE FILTER
     # =====================================================
 
     st.divider()
 
-    st.markdown(
-        '<div class="section-title">'
-        'Connection'
-        '</div>',
-        unsafe_allow_html=True
+    filtered_df = (
+        history_df.copy()
     )
 
 
-    wifi_status = status_value(
-        latest.get(
-            "wifi"
-        )
-    )
+    if "timestamp" in filtered_df.columns:
 
-
-    if wifi_status == "ONLINE":
-
-        wifi_class = (
-            "status-card status-online"
-        )
-
-    else:
-
-        wifi_class = (
-            "status-card status-offline"
-        )
-
-
-    connection_html = (
-
-        '<div class="dashboard-grid-2">'
-
-        '<div class="'
-        + wifi_class
-        + '">'
-        'Wi-Fi: '
-        + safe_text(wifi_status)
-        + '</div>'
-
-        '<div class="status-card status-online">'
-        'Azure: ONLINE'
-        '</div>'
-
-        '</div>'
-    )
-
-
-    st.markdown(
-        connection_html,
-        unsafe_allow_html=True
-    )
-
-
-    # =====================================================
-    # SENSOR HISTORY
-    # =====================================================
-
-    st.divider()
-
-    st.markdown(
-        '<div class="section-title">'
-        'Sensor History'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
-    # =====================================================
-    # GREENHOUSE TEMPERATURE HISTORY
-    # =====================================================
-
-    if (
-        "timestamp" in df.columns
-        and
-        "greenhouse_temperature" in df.columns
-    ):
-
-        st.markdown(
-            '<div class="chart-title">'
-            'Greenhouse Temperature'
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-
-        temperature_chart = (
-            df[
-                [
-                    "timestamp",
-                    "greenhouse_temperature"
-                ]
-            ]
-            .dropna()
-            .set_index(
+        minimum_date = (
+            filtered_df[
                 "timestamp"
-            )
-        )
-
-
-        st.line_chart(
-            temperature_chart,
-            use_container_width=True
-        )
-
-
-    # =====================================================
-    # PH HISTORY
-    # =====================================================
-
-    if (
-        "timestamp" in df.columns
-        and
-        "ph" in df.columns
-    ):
-
-        st.markdown(
-            '<div class="chart-title">'
-            'pH Level'
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-
-        ph_chart = (
-            df[
-                [
-                    "timestamp",
-                    "ph"
-                ]
             ]
-            .dropna()
-            .set_index(
+            .min()
+            .date()
+        )
+
+        maximum_date = (
+            filtered_df[
                 "timestamp"
-            )
-        )
-
-
-        st.line_chart(
-            ph_chart,
-            use_container_width=True
-        )
-
-
-    # =====================================================
-    # SOIL MOISTURE HISTORY
-    # =====================================================
-
-    if (
-        "timestamp" in df.columns
-        and
-        "soil_moisture" in df.columns
-    ):
-
-        st.markdown(
-            '<div class="chart-title">'
-            'Soil Moisture'
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-
-        soil_chart = (
-            df[
-                [
-                    "timestamp",
-                    "soil_moisture"
-                ]
             ]
-            .dropna()
-            .set_index(
-                "timestamp"
+            .max()
+            .date()
+        )
+
+
+        selected_dates = st.date_input(
+            "Filter by Date",
+            value=(
+                minimum_date,
+                maximum_date
+            ),
+            min_value=minimum_date,
+            max_value=maximum_date
+        )
+
+
+        if isinstance(
+            selected_dates,
+            tuple
+        ):
+
+            if len(
+                selected_dates
+            ) == 2:
+
+                start_date = (
+                    selected_dates[0]
+                )
+
+                end_date = (
+                    selected_dates[1]
+                )
+
+
+                filtered_df = filtered_df[
+                    (
+                        filtered_df[
+                            "timestamp"
+                        ].dt.date
+                        >= start_date
+                    )
+                    &
+                    (
+                        filtered_df[
+                            "timestamp"
+                        ].dt.date
+                        <= end_date
+                    )
+                ]
+
+
+    # =====================================================
+    # STATUS FILTER
+    # =====================================================
+
+    filter_col1, filter_col2 = (
+        st.columns(
+            2
+        )
+    )
+
+
+    with filter_col1:
+
+        if (
+            "ph_alert"
+            in filtered_df.columns
+        ):
+
+            ph_options = (
+                sorted(
+                    filtered_df[
+                        "ph_alert"
+                    ]
+                    .dropna()
+                    .astype(str)
+                    .unique()
+                )
             )
-        )
 
 
-        st.line_chart(
-            soil_chart,
-            use_container_width=True
-        )
+            selected_ph = (
+                st.multiselect(
+                    "pH Status",
+                    ph_options
+                )
+            )
+
+
+            if selected_ph:
+
+                filtered_df = (
+                    filtered_df[
+                        filtered_df[
+                            "ph_alert"
+                        ]
+                        .astype(str)
+                        .isin(
+                            selected_ph
+                        )
+                    ]
+                )
+
+
+    with filter_col2:
+
+        if (
+            "water_alert"
+            in filtered_df.columns
+        ):
+
+            water_options = (
+                sorted(
+                    filtered_df[
+                        "water_alert"
+                    ]
+                    .dropna()
+                    .astype(str)
+                    .unique()
+                )
+            )
+
+
+            selected_water = (
+                st.multiselect(
+                    "Water Status",
+                    water_options
+                )
+            )
+
+
+            if selected_water:
+
+                filtered_df = (
+                    filtered_df[
+                        filtered_df[
+                            "water_alert"
+                        ]
+                        .astype(str)
+                        .isin(
+                            selected_water
+                        )
+                    ]
+                )
 
 
     # =====================================================
-    # RAW AZURE DATA
+    # SELECT FINAL TABLE COLUMNS
     # =====================================================
 
-    st.divider()
+    preferred_columns = [
+
+        "timestamp",
+
+        "fish_tank_level",
+        "fish_temperature",
+        "ph",
+        "ph_alert",
+        "fish_refill_pump",
+
+        "greenhouse_temperature",
+        "soil_moisture",
+        "greenhouse_pump",
+        "fan",
+
+        "water_tank_1_level",
+        "water_tank_2_level",
+        "water_alert",
+
+        "dht_status",
+        "wifi",
+
+        "device"
+
+    ]
 
 
-    with st.expander(
-        "View Azure Raw Data"
-    ):
+    available_columns = [
 
-        if "timestamp" in df.columns:
+        column
 
-            raw_df = df.sort_values(
+        for column
+        in preferred_columns
+
+        if column
+        in filtered_df.columns
+
+    ]
+
+
+    table_df = (
+        filtered_df[
+            available_columns
+        ]
+        .copy()
+    )
+
+
+    # =====================================================
+    # FORMAT TIMESTAMP
+    # =====================================================
+
+    if "timestamp" in table_df.columns:
+
+        table_df = (
+            table_df.sort_values(
                 "timestamp",
                 ascending=False
             )
-
-        else:
-
-            raw_df = df
-
-
-        st.dataframe(
-            raw_df,
-            use_container_width=True
         )
+
+
+        table_df[
+            "timestamp"
+        ] = (
+            table_df[
+                "timestamp"
+            ]
+            .dt.strftime(
+                "%d/%m/%Y %H:%M:%S"
+            )
+        )
+
+
+    # =====================================================
+    # FRIENDLY COLUMN NAMES
+    # =====================================================
+
+    table_df = table_df.rename(
+        columns={
+
+            "timestamp":
+                "Timestamp",
+
+            "fish_tank_level":
+                "Fish Tank Level (%)",
+
+            "fish_temperature":
+                "Fish Temp (°C)",
+
+            "ph":
+                "pH",
+
+            "ph_alert":
+                "pH Status",
+
+            "fish_refill_pump":
+                "Fish Refill Pump",
+
+            "greenhouse_temperature":
+                "Greenhouse Temp (°C)",
+
+            "soil_moisture":
+                "Soil Moisture (%)",
+
+            "greenhouse_pump":
+                "Greenhouse Pump",
+
+            "fan":
+                "Fan",
+
+            "water_tank_1_level":
+                "Water Tank 1 (%)",
+
+            "water_tank_2_level":
+                "Water Tank 2 (%)",
+
+            "water_alert":
+                "Water Status",
+
+            "dht_status":
+                "Temperature Sensor",
+
+            "wifi":
+                "Wi-Fi",
+
+            "device":
+                "Device"
+
+        }
+    )
+
+
+    # =====================================================
+    # DISPLAY RECORD COUNT
+    # =====================================================
+
+    st.write(
+        "Showing",
+        len(table_df),
+        "of",
+        total_records,
+        "records"
+    )
+
+
+    # =====================================================
+    # HISTORICAL DATA TABLE
+    # =====================================================
+
+    st.dataframe(
+        table_df,
+        use_container_width=True,
+        hide_index=True,
+        height=600
+    )
+
+
+    # =====================================================
+    # DOWNLOAD CSV
+    # =====================================================
+
+    csv_data = (
+        table_df
+        .to_csv(
+            index=False
+        )
+        .encode(
+            "utf-8"
+        )
+    )
+
+
+    st.download_button(
+        label="Download Historical Data CSV",
+        data=csv_data,
+        file_name=(
+            "smart_aquaponic_greenhouse_history.csv"
+        ),
+        mime="text/csv"
+    )
 
 
     # =====================================================
@@ -1098,19 +1732,7 @@ def live_dashboard():
     # =====================================================
 
     st.caption(
-        "Data source: "
-        "Azure IoT Hub → "
-        "Stream Analytics → "
-        "Azure Blob Storage"
+        "Historical data source: "
+        "Azure Blob Storage - "
+        + CONTAINER_NAME
     )
-
-    st.caption(
-        "Historical charts use the sensor record timestamp."
-    )
-
-
-# =========================================================
-# RUN LIVE DASHBOARD
-# =========================================================
-
-live_dashboard()

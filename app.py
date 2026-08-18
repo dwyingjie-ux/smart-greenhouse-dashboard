@@ -1,4 +1,5 @@
 import json
+import html
 
 import pandas as pd
 import streamlit as st
@@ -17,21 +18,301 @@ st.set_page_config(
 
 
 # =========================================================
+# RESPONSIVE CSS
+# =========================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* =====================================================
+       MAIN PAGE
+       ===================================================== */
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1400px;
+    }
+
+
+    /* =====================================================
+       TITLE
+       ===================================================== */
+
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .sub-title {
+        font-size: 0.85rem;
+        color: #777;
+        margin-top: 0.2rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .last-record {
+        font-size: 0.78rem;
+        color: #777;
+        margin-top: 0.2rem;
+    }
+
+
+    /* =====================================================
+       SECTION TITLE
+       ===================================================== */
+
+    .section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        margin-bottom: 0.7rem;
+    }
+
+
+    /* =====================================================
+       DASHBOARD GRID
+       ===================================================== */
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .dashboard-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .dashboard-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+
+    /* =====================================================
+       METRIC CARDS
+       ===================================================== */
+
+    .metric-card {
+        border: 1px solid rgba(128, 128, 128, 0.20);
+        border-radius: 10px;
+        padding: 14px 14px 12px 14px;
+        min-height: 92px;
+        background: rgba(128, 128, 128, 0.035);
+        overflow: hidden;
+    }
+
+    .metric-label {
+        font-size: 0.78rem;
+        color: #666;
+        margin-bottom: 6px;
+        line-height: 1.15;
+    }
+
+    .metric-value {
+        font-size: 1.55rem;
+        font-weight: 600;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+
+    .metric-status {
+        font-size: 0.68rem;
+        color: #777;
+        margin-top: 6px;
+        line-height: 1.15;
+    }
+
+
+    /* =====================================================
+       CONNECTION STATUS
+       ===================================================== */
+
+    .status-card {
+        border-radius: 9px;
+        padding: 12px 14px;
+        font-size: 0.82rem;
+        font-weight: 500;
+    }
+
+    .status-online {
+        background-color: rgba(46, 160, 67, 0.12);
+        color: #16803a;
+        border: 1px solid rgba(46, 160, 67, 0.18);
+    }
+
+    .status-offline {
+        background-color: rgba(220, 53, 69, 0.12);
+        color: #b4232d;
+        border: 1px solid rgba(220, 53, 69, 0.18);
+    }
+
+
+    /* =====================================================
+       LIVE BADGE
+       ===================================================== */
+
+    .live-badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        border-radius: 20px;
+        padding: 4px 10px;
+        background-color: rgba(46, 160, 67, 0.12);
+        color: #16803a;
+        border: 1px solid rgba(46, 160, 67, 0.18);
+    }
+
+
+    /* =====================================================
+       CHART HEADINGS
+       ===================================================== */
+
+    .chart-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+        margin-bottom: 0.3rem;
+    }
+
+
+    /* =====================================================
+       PHONE
+       ===================================================== */
+
+    @media (max-width: 768px) {
+
+        .block-container {
+            padding-top: 1rem;
+            padding-left: 0.8rem;
+            padding-right: 0.8rem;
+            padding-bottom: 1.2rem;
+        }
+
+        .main-title {
+            font-size: 1.45rem;
+            line-height: 1.2;
+        }
+
+        .sub-title {
+            font-size: 0.67rem;
+        }
+
+        .last-record {
+            font-size: 0.64rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            margin-top: 0.65rem;
+            margin-bottom: 0.45rem;
+        }
+
+        /*
+        Instead of Streamlit stacking every item vertically,
+        use two compact cards per row on phone.
+        */
+
+        .dashboard-grid,
+        .dashboard-grid-3,
+        .dashboard-grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+        }
+
+        .metric-card {
+            min-height: 72px;
+            padding: 9px 9px 8px 9px;
+            border-radius: 8px;
+        }
+
+        .metric-label {
+            font-size: 0.60rem;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.08rem;
+        }
+
+        .metric-status {
+            font-size: 0.55rem;
+            margin-top: 4px;
+        }
+
+        .status-card {
+            padding: 9px 10px;
+            font-size: 0.66rem;
+        }
+
+        .live-badge {
+            font-size: 0.58rem;
+            padding: 3px 7px;
+        }
+
+        .chart-title {
+            font-size: 0.72rem;
+        }
+
+        /*
+        Make Streamlit charts use more of the phone width.
+        */
+
+        [data-testid="stVegaLiteChart"] {
+            width: 100% !important;
+        }
+
+        /*
+        Reduce divider spacing.
+        */
+
+        hr {
+            margin-top: 0.8rem !important;
+            margin-bottom: 0.8rem !important;
+        }
+
+        /*
+        Smaller expander/raw data text.
+        */
+
+        [data-testid="stExpander"] {
+            font-size: 0.7rem;
+        }
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# =========================================================
 # AZURE STORAGE SETTINGS
 # =========================================================
 
-STORAGE_ACCOUNT_NAME = st.secrets["STORAGE_ACCOUNT_NAME"]
+STORAGE_ACCOUNT_NAME = st.secrets[
+    "STORAGE_ACCOUNT_NAME"
+]
 
-CONTAINER_NAME = st.secrets["CONTAINER_NAME"]
+CONTAINER_NAME = st.secrets[
+    "CONTAINER_NAME"
+]
 
-
-# =========================================================
-# STORAGE ACCOUNT KEY
-#
-# Paste your Azure Storage Account Key below.
-# =========================================================
-
-STORAGE_ACCOUNT_KEY = st.secrets["STORAGE_ACCOUNT_KEY"]
+STORAGE_ACCOUNT_KEY = st.secrets[
+    "STORAGE_ACCOUNT_KEY"
+]
 
 
 # =========================================================
@@ -63,11 +344,6 @@ def get_container_client():
 
 # =========================================================
 # LOAD DATA FROM AZURE
-#
-# NO CACHE HERE.
-#
-# Every live refresh should ask Azure for
-# the latest Blob data.
 # =========================================================
 
 def load_data():
@@ -78,7 +354,7 @@ def load_data():
 
 
     # =====================================================
-    # LIST ALL BLOBS
+    # LIST BLOBS
     # =====================================================
 
     blobs = list(
@@ -103,18 +379,15 @@ def load_data():
 
     # =====================================================
     # READ RECENT BLOBS
-    #
-    # Enough for latest readings + charts
     # =====================================================
 
     recent_blobs = blobs[:20]
-
 
     records = []
 
 
     # =====================================================
-    # READ EACH BLOB
+    # READ BLOB DATA
     # =====================================================
 
     for blob in recent_blobs:
@@ -139,10 +412,6 @@ def load_data():
             )
 
 
-            # =================================================
-            # ONE JSON RECORD PER LINE
-            # =================================================
-
             for line in raw_data.splitlines():
 
                 line = line.strip()
@@ -163,6 +432,7 @@ def load_data():
                         record
                     )
 
+
                 except json.JSONDecodeError:
 
                     pass
@@ -174,7 +444,7 @@ def load_data():
 
 
     # =====================================================
-    # NO VALID DATA
+    # NO DATA
     # =====================================================
 
     if len(records) == 0:
@@ -210,8 +480,6 @@ def load_data():
         )
 
 
-        # Remove duplicates if same records
-        # appear across blobs
         df = df.drop_duplicates(
             subset=[
                 "timestamp"
@@ -229,7 +497,7 @@ def load_data():
 
 
 # =========================================================
-# DISPLAY VALUE
+# VALUE HELPERS
 # =========================================================
 
 def display_value(
@@ -250,7 +518,7 @@ def display_value(
 
             return "N/A"
 
-    except:
+    except Exception:
 
         pass
 
@@ -260,10 +528,6 @@ def display_value(
         + suffix
     )
 
-
-# =========================================================
-# STATUS VALUE
-# =========================================================
 
 def status_value(
     value
@@ -282,7 +546,7 @@ def status_value(
 
             return "UNKNOWN"
 
-    except:
+    except Exception:
 
         pass
 
@@ -293,23 +557,117 @@ def status_value(
 
 
 # =========================================================
+# SAFE HTML
+# =========================================================
+
+def safe_text(
+    value
+):
+
+    return html.escape(
+        str(value)
+    )
+
+
+# =========================================================
+# METRIC CARD
+# =========================================================
+
+def metric_card(
+    label,
+    value,
+    status=None
+):
+
+    status_html = ""
+
+
+    if status is not None:
+
+        status_html = (
+            '<div class="metric-status">'
+            + safe_text(status)
+            + '</div>'
+        )
+
+
+    return (
+        '<div class="metric-card">'
+        '<div class="metric-label">'
+        + safe_text(label)
+        + '</div>'
+        '<div class="metric-value">'
+        + safe_text(value)
+        + '</div>'
+        + status_html
+        + '</div>'
+    )
+
+
+# =========================================================
+# METRIC GRID
+# =========================================================
+
+def metric_grid(
+    cards,
+    columns=4
+):
+
+    if columns == 2:
+
+        grid_class = "dashboard-grid-2"
+
+    elif columns == 3:
+
+        grid_class = "dashboard-grid-3"
+
+    else:
+
+        grid_class = "dashboard-grid"
+
+
+    html_code = (
+        '<div class="'
+        + grid_class
+        + '">'
+    )
+
+
+    for card in cards:
+
+        html_code += card
+
+
+    html_code += "</div>"
+
+
+    st.markdown(
+        html_code,
+        unsafe_allow_html=True
+    )
+
+
+# =========================================================
 # PAGE TITLE
 # =========================================================
 
-st.title(
-    "🌱 Smart Aquaponic Greenhouse"
+st.markdown(
+    '<div class="main-title">'
+    '🌱 Smart Aquaponic Greenhouse'
+    '</div>',
+    unsafe_allow_html=True
 )
 
-st.caption(
-    "Azure IoT Live Monitoring Dashboard"
+st.markdown(
+    '<div class="sub-title">'
+    'Azure IoT Live Monitoring Dashboard'
+    '</div>',
+    unsafe_allow_html=True
 )
 
 
 # =========================================================
 # LIVE DASHBOARD
-#
-# Streamlit automatically reruns this section
-# every 10 seconds while the page is open.
 # =========================================================
 
 @st.fragment(
@@ -319,7 +677,7 @@ def live_dashboard():
 
 
     # =====================================================
-    # LOAD LATEST AZURE DATA
+    # LOAD DATA
     # =====================================================
 
     try:
@@ -361,39 +719,55 @@ def live_dashboard():
 
 
     # =====================================================
-    # LIVE REFRESH STATUS
+    # LAST SENSOR RECORD
     # =====================================================
 
-    top_left, top_right = st.columns(
-        [3, 1]
+    record_text = "Unknown"
+
+
+    if "timestamp" in df.columns:
+
+        latest_time = latest[
+            "timestamp"
+        ]
+
+
+        if pd.notna(
+            latest_time
+        ):
+
+            record_text = (
+                latest_time.strftime(
+                    "%d/%m/%Y %H:%M:%S"
+                )
+            )
+
+
+    status_left, status_right = st.columns(
+        [4, 1]
     )
 
 
-    with top_left:
+    with status_left:
 
-        if "timestamp" in df.columns:
-
-            latest_time = latest[
-                "timestamp"
-            ]
-
-
-            if pd.notna(
-                latest_time
-            ):
-
-                st.caption(
-                    "Last Updated: "
-                    + latest_time.strftime(
-                        "%d/%m/%Y %H:%M:%S"
-                    )
-                )
+        st.markdown(
+            '<div class="last-record">'
+            'Last Sensor Record: '
+            + safe_text(record_text)
+            + '</div>',
+            unsafe_allow_html=True
+        )
 
 
-    with top_right:
+    with status_right:
 
-        st.success(
-            "● LIVE"
+        st.markdown(
+            '<div style="text-align:right;">'
+            '<span class="live-badge">'
+            '● LIVE'
+            '</span>'
+            '</div>',
+            unsafe_allow_html=True
         )
 
 
@@ -403,19 +777,24 @@ def live_dashboard():
 
     st.divider()
 
-    st.subheader(
-        "Aquaponics"
+    st.markdown(
+        '<div class="section-title">'
+        'Aquaponics'
+        '</div>',
+        unsafe_allow_html=True
     )
 
 
-    col1, col2, col3, col4 = st.columns(
-        4
+    ph_status = status_value(
+        latest.get(
+            "ph_alert"
+        )
     )
 
 
-    with col1:
+    aquaponics_cards = [
 
-        st.metric(
+        metric_card(
             "Fish Tank Level",
             display_value(
                 latest.get(
@@ -423,12 +802,9 @@ def live_dashboard():
                 ),
                 "%"
             )
-        )
+        ),
 
-
-    with col2:
-
-        st.metric(
+        metric_card(
             "Fish Temperature",
             display_value(
                 latest.get(
@@ -436,33 +812,19 @@ def live_dashboard():
                 ),
                 " °C"
             )
-        )
+        ),
 
-
-    with col3:
-
-        st.metric(
+        metric_card(
             "pH",
             display_value(
                 latest.get(
                     "ph"
                 )
-            )
-        )
+            ),
+            "Status: " + ph_status
+        ),
 
-        st.caption(
-            "Status: "
-            + status_value(
-                latest.get(
-                    "ph_alert"
-                )
-            )
-        )
-
-
-    with col4:
-
-        st.metric(
+        metric_card(
             "Fish Refill Pump",
             status_value(
                 latest.get(
@@ -471,6 +833,14 @@ def live_dashboard():
             )
         )
 
+    ]
+
+
+    metric_grid(
+        aquaponics_cards,
+        4
+    )
+
 
     # =====================================================
     # GREENHOUSE
@@ -478,19 +848,17 @@ def live_dashboard():
 
     st.divider()
 
-    st.subheader(
-        "Greenhouse"
+    st.markdown(
+        '<div class="section-title">'
+        'Greenhouse'
+        '</div>',
+        unsafe_allow_html=True
     )
 
 
-    col1, col2, col3, col4 = st.columns(
-        4
-    )
+    greenhouse_cards = [
 
-
-    with col1:
-
-        st.metric(
+        metric_card(
             "Temperature",
             display_value(
                 latest.get(
@@ -498,12 +866,9 @@ def live_dashboard():
                 ),
                 " °C"
             )
-        )
+        ),
 
-
-    with col2:
-
-        st.metric(
+        metric_card(
             "Soil Moisture",
             display_value(
                 latest.get(
@@ -511,24 +876,18 @@ def live_dashboard():
                 ),
                 "%"
             )
-        )
+        ),
 
-
-    with col3:
-
-        st.metric(
+        metric_card(
             "Greenhouse Pump",
             status_value(
                 latest.get(
                     "greenhouse_pump"
                 )
             )
-        )
+        ),
 
-
-    with col4:
-
-        st.metric(
+        metric_card(
             "Fan",
             status_value(
                 latest.get(
@@ -537,6 +896,14 @@ def live_dashboard():
             )
         )
 
+    ]
+
+
+    metric_grid(
+        greenhouse_cards,
+        4
+    )
+
 
     # =====================================================
     # WATER SYSTEM
@@ -544,19 +911,17 @@ def live_dashboard():
 
     st.divider()
 
-    st.subheader(
-        "Water System"
+    st.markdown(
+        '<div class="section-title">'
+        'Water System'
+        '</div>',
+        unsafe_allow_html=True
     )
 
 
-    col1, col2, col3 = st.columns(
-        3
-    )
+    water_cards = [
 
-
-    with col1:
-
-        st.metric(
+        metric_card(
             "Water Tank 1",
             display_value(
                 latest.get(
@@ -564,12 +929,9 @@ def live_dashboard():
                 ),
                 "%"
             )
-        )
+        ),
 
-
-    with col2:
-
-        st.metric(
+        metric_card(
             "Water Tank 2",
             display_value(
                 latest.get(
@@ -577,12 +939,9 @@ def live_dashboard():
                 ),
                 "%"
             )
-        )
+        ),
 
-
-    with col3:
-
-        st.metric(
+        metric_card(
             "Water Status",
             status_value(
                 latest.get(
@@ -591,6 +950,14 @@ def live_dashboard():
             )
         )
 
+    ]
+
+
+    metric_grid(
+        water_cards,
+        3
+    )
+
 
     # =====================================================
     # CONNECTION
@@ -598,46 +965,57 @@ def live_dashboard():
 
     st.divider()
 
-    st.subheader(
-        "Connection"
+    st.markdown(
+        '<div class="section-title">'
+        'Connection'
+        '</div>',
+        unsafe_allow_html=True
     )
 
 
-    col1, col2 = st.columns(
-        2
+    wifi_status = status_value(
+        latest.get(
+            "wifi"
+        )
     )
 
 
-    with col1:
+    if wifi_status == "ONLINE":
 
-        wifi_status = status_value(
-            latest.get(
-                "wifi"
-            )
+        wifi_class = (
+            "status-card status-online"
+        )
+
+    else:
+
+        wifi_class = (
+            "status-card status-offline"
         )
 
 
-        if wifi_status == "ONLINE":
+    connection_html = (
 
-            st.success(
-                "Wi-Fi: ONLINE"
-            )
+        '<div class="dashboard-grid-2">'
 
-        else:
+        '<div class="'
+        + wifi_class
+        + '">'
+        'Wi-Fi: '
+        + safe_text(wifi_status)
+        + '</div>'
 
-            st.error(
-                "Wi-Fi: "
-                + wifi_status
-            )
+        '<div class="status-card status-online">'
+        'Azure: ONLINE'
+        '</div>'
+
+        '</div>'
+    )
 
 
-    with col2:
-
-        # Since this page successfully retrieved
-        # data from Azure Blob Storage.
-        st.success(
-            "Azure: ONLINE"
-        )
+    st.markdown(
+        connection_html,
+        unsafe_allow_html=True
+    )
 
 
     # =====================================================
@@ -646,8 +1024,11 @@ def live_dashboard():
 
     st.divider()
 
-    st.subheader(
-        "Sensor History"
+    st.markdown(
+        '<div class="section-title">'
+        'Sensor History'
+        '</div>',
+        unsafe_allow_html=True
     )
 
 
@@ -658,12 +1039,14 @@ def live_dashboard():
     if (
         "timestamp" in df.columns
         and
-        "greenhouse_temperature"
-        in df.columns
+        "greenhouse_temperature" in df.columns
     ):
 
-        st.write(
-            "Greenhouse Temperature"
+        st.markdown(
+            '<div class="chart-title">'
+            'Greenhouse Temperature'
+            '</div>',
+            unsafe_allow_html=True
         )
 
 
@@ -682,7 +1065,8 @@ def live_dashboard():
 
 
         st.line_chart(
-            temperature_chart
+            temperature_chart,
+            use_container_width=True
         )
 
 
@@ -696,8 +1080,11 @@ def live_dashboard():
         "ph" in df.columns
     ):
 
-        st.write(
-            "pH Level"
+        st.markdown(
+            '<div class="chart-title">'
+            'pH Level'
+            '</div>',
+            unsafe_allow_html=True
         )
 
 
@@ -716,7 +1103,8 @@ def live_dashboard():
 
 
         st.line_chart(
-            ph_chart
+            ph_chart,
+            use_container_width=True
         )
 
 
@@ -727,12 +1115,14 @@ def live_dashboard():
     if (
         "timestamp" in df.columns
         and
-        "soil_moisture"
-        in df.columns
+        "soil_moisture" in df.columns
     ):
 
-        st.write(
-            "Soil Moisture"
+        st.markdown(
+            '<div class="chart-title">'
+            'Soil Moisture'
+            '</div>',
+            unsafe_allow_html=True
         )
 
 
@@ -751,7 +1141,8 @@ def live_dashboard():
 
 
         st.line_chart(
-            soil_chart
+            soil_chart,
+            use_container_width=True
         )
 
 

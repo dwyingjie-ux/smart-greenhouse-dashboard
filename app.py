@@ -25,11 +25,20 @@ st.markdown(
     """
     <style>
 
+    /* =====================================================
+       MAIN PAGE
+       ===================================================== */
+
     .block-container {
         padding-top: 1.8rem;
         padding-bottom: 2rem;
         max-width: 1500px;
     }
+
+
+    /* =====================================================
+       MAIN TITLE
+       ===================================================== */
 
     .main-title {
         font-size: 2.2rem;
@@ -50,12 +59,48 @@ st.markdown(
         margin-top: 0.2rem;
     }
 
+
+    /* =====================================================
+       LOGIN
+       ===================================================== */
+
+    .login-logo {
+        text-align: center;
+        font-size: 2rem;
+        margin-top: 0.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-title {
+        text-align: center;
+        font-size: 1.55rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+    }
+
+    .login-description {
+        text-align: center;
+        color: #777;
+        font-size: 0.82rem;
+        margin-bottom: 1.4rem;
+    }
+
+
+    /* =====================================================
+       SECTION TITLE
+       ===================================================== */
+
     .section-title {
         font-size: 1.35rem;
         font-weight: 700;
         margin-top: 1rem;
         margin-bottom: 0.7rem;
     }
+
+
+    /* =====================================================
+       DASHBOARD GRID
+       ===================================================== */
 
     .dashboard-grid {
         display: grid;
@@ -80,6 +125,11 @@ st.markdown(
         width: 100%;
         margin-bottom: 10px;
     }
+
+
+    /* =====================================================
+       SENSOR CARDS
+       ===================================================== */
 
     .metric-card {
         border: 1px solid rgba(128, 128, 128, 0.20);
@@ -106,6 +156,11 @@ st.markdown(
         margin-top: 6px;
     }
 
+
+    /* =====================================================
+       CONNECTION STATUS
+       ===================================================== */
+
     .status-card {
         border-radius: 9px;
         padding: 12px 14px;
@@ -125,6 +180,11 @@ st.markdown(
         border: 1px solid rgba(220, 53, 69, 0.18);
     }
 
+
+    /* =====================================================
+       LIVE BADGE
+       ===================================================== */
+
     .live-badge {
         display: inline-block;
         font-size: 0.72rem;
@@ -136,30 +196,16 @@ st.markdown(
         border: 1px solid rgba(46, 160, 67, 0.18);
     }
 
+
+    /* =====================================================
+       CHART
+       ===================================================== */
+
     .chart-title {
         font-size: 0.9rem;
         font-weight: 600;
         margin-top: 0.5rem;
         margin-bottom: 0.3rem;
-    }
-
-
-    /* =====================================================
-       LOGIN
-       ===================================================== */
-
-    .login-title {
-        text-align: center;
-        font-size: 2rem;
-        font-weight: 700;
-        margin-top: 3rem;
-    }
-
-    .login-subtitle {
-        text-align: center;
-        color: #777;
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
     }
 
 
@@ -180,7 +226,7 @@ st.markdown(
     }
 
     .history-table th {
-        border: 1px solid rgba(128,128,128,0.25);
+        border: 1px solid rgba(128, 128, 128, 0.25);
         padding: 5px 2px;
         text-align: center;
         font-size: 8px;
@@ -191,7 +237,7 @@ st.markdown(
     }
 
     .history-table td {
-        border: 1px solid rgba(128,128,128,0.20);
+        border: 1px solid rgba(128, 128, 128, 0.20);
         padding: 4px 2px;
         text-align: center;
         font-size: 8px;
@@ -201,11 +247,11 @@ st.markdown(
     }
 
     .history-table tbody tr:nth-child(even) {
-        background-color: rgba(128,128,128,0.04);
+        background-color: rgba(128, 128, 128, 0.04);
     }
 
     .history-table tbody tr:hover {
-        background-color: rgba(128,128,128,0.08);
+        background-color: rgba(128, 128, 128, 0.08);
     }
 
     .history-table th:first-child,
@@ -224,6 +270,7 @@ st.markdown(
             padding-top: 1rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
+            padding-bottom: 1.2rem;
         }
 
         .main-title {
@@ -236,6 +283,18 @@ st.markdown(
 
         .last-record {
             font-size: 0.64rem;
+        }
+
+        .login-logo {
+            font-size: 1.7rem;
+        }
+
+        .login-title {
+            font-size: 1.25rem;
+        }
+
+        .login-description {
+            font-size: 0.72rem;
         }
 
         .section-title {
@@ -297,86 +356,126 @@ st.markdown(
 # LOGIN SETTINGS
 # =========================================================
 
-LOGIN_USERNAME = st.secrets["DASHBOARD_USERNAME"]
-LOGIN_PASSWORD = st.secrets["DASHBOARD_PASSWORD"]
+LOGIN_USERNAME = st.secrets[
+    "DASHBOARD_USERNAME"
+]
+
+LOGIN_PASSWORD = st.secrets[
+    "DASHBOARD_PASSWORD"
+]
 
 
 # =========================================================
-# SESSION LOGIN STATE
+# LOGIN SESSION
 # =========================================================
 
 if "logged_in" not in st.session_state:
+
     st.session_state.logged_in = False
 
 
 # =========================================================
-# LOGIN FUNCTION
+# LOGIN WINDOW
 # =========================================================
 
-def login():
+def show_login():
 
-    st.markdown(
-        '<div class="login-title">'
-        '🌱 Smart Aquaponic Greenhouse'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    # -----------------------------------------------------
+    # Center login window
+    # -----------------------------------------------------
 
-    st.markdown(
-        '<div class="login-subtitle">'
-        'Dashboard Login'
-        '</div>',
-        unsafe_allow_html=True
+    left, center, right = st.columns(
+        [1, 1.15, 1]
     )
 
 
-    # Center login form
-    left, middle, right = st.columns(
-        [1, 1.2, 1]
-    )
+    with center:
+
+        # Add some spacing above login window
+        st.write("")
+        st.write("")
 
 
-    with middle:
-
-        username = st.text_input(
-            "Username"
-        )
-
-        password = st.text_input(
-            "Password",
-            type="password"
-        )
-
-
-        if st.button(
-            "Login",
-            use_container_width=True
+        with st.container(
+            border=True
         ):
 
-            if (
-                username == LOGIN_USERNAME
-                and
-                password == LOGIN_PASSWORD
+            st.markdown(
+                """
+                <div class="login-logo">
+                    🌱
+                </div>
+
+                <div class="login-title">
+                    Smart Aquaponic Greenhouse
+                </div>
+
+                <div class="login-description">
+                    Sign in to access the monitoring dashboard
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            # -------------------------------------------------
+            # LOGIN FORM
+            # -------------------------------------------------
+
+            with st.form(
+                "login_form"
             ):
 
-                st.session_state.logged_in = True
-
-                st.rerun()
-
-            else:
-
-                st.error(
-                    "Incorrect username or password."
+                username = st.text_input(
+                    "Username",
+                    placeholder="Enter username"
                 )
 
 
+                password = st.text_input(
+                    "Password",
+                    type="password",
+                    placeholder="Enter password"
+                )
+
+
+                login_button = st.form_submit_button(
+                    "Login",
+                    use_container_width=True
+                )
+
+
+            # -------------------------------------------------
+            # CHECK LOGIN
+            # -------------------------------------------------
+
+            if login_button:
+
+                if (
+                    username == LOGIN_USERNAME
+                    and
+                    password == LOGIN_PASSWORD
+                ):
+
+                    st.session_state.logged_in = True
+
+                    st.rerun()
+
+
+                else:
+
+                    st.error(
+                        "Incorrect username or password."
+                    )
+
+
 # =========================================================
-# SHOW LOGIN IF NOT AUTHENTICATED
+# REQUIRE LOGIN
 # =========================================================
 
 if not st.session_state.logged_in:
 
-    login()
+    show_login()
 
     st.stop()
 
@@ -429,7 +528,9 @@ def get_container_client():
 # READ BLOB RECORDS
 # =========================================================
 
-def read_blob_records(blobs):
+def read_blob_records(
+    blobs
+):
 
     container_client = (
         get_container_client()
@@ -480,6 +581,7 @@ def read_blob_records(blobs):
                         record
                     )
 
+
                 except json.JSONDecodeError:
 
                     pass
@@ -497,7 +599,9 @@ def read_blob_records(blobs):
 # PREPARE DATAFRAME
 # =========================================================
 
-def prepare_dataframe(records):
+def prepare_dataframe(
+    records
+):
 
     if len(records) == 0:
 
@@ -516,14 +620,21 @@ def prepare_dataframe(records):
             errors="coerce"
         )
 
+
         df = df.dropna(
-            subset=["timestamp"]
+            subset=[
+                "timestamp"
+            ]
         )
 
+
         df = df.drop_duplicates(
-            subset=["timestamp"],
+            subset=[
+                "timestamp"
+            ],
             keep="last"
         )
+
 
         df = df.sort_values(
             "timestamp"
@@ -629,23 +740,31 @@ def display_value(
 
     try:
 
-        if pd.isna(value):
+        if pd.isna(
+            value
+        ):
 
             return "N/A"
+
 
     except Exception:
 
         pass
 
 
-    return str(value) + suffix
+    return (
+        str(value)
+        + suffix
+    )
 
 
 # =========================================================
 # STATUS VALUE
 # =========================================================
 
-def status_value(value):
+def status_value(
+    value
+):
 
     if value is None:
 
@@ -654,23 +773,30 @@ def status_value(value):
 
     try:
 
-        if pd.isna(value):
+        if pd.isna(
+            value
+        ):
 
             return "UNKNOWN"
+
 
     except Exception:
 
         pass
 
 
-    return str(value).upper()
+    return str(
+        value
+    ).upper()
 
 
 # =========================================================
 # SAFE HTML
 # =========================================================
 
-def safe_text(value):
+def safe_text(
+    value
+):
 
     return html.escape(
         str(value)
@@ -723,15 +849,23 @@ def metric_grid(
 
     if columns == 2:
 
-        grid_class = "dashboard-grid-2"
+        grid_class = (
+            "dashboard-grid-2"
+        )
+
 
     elif columns == 3:
 
-        grid_class = "dashboard-grid-3"
+        grid_class = (
+            "dashboard-grid-3"
+        )
+
 
     else:
 
-        grid_class = "dashboard-grid"
+        grid_class = (
+            "dashboard-grid"
+        )
 
 
     html_code = (
@@ -752,7 +886,7 @@ def metric_grid(
 # =========================================================
 # SIDEBAR
 #
-# No 🌱 Greenhouse title
+# No greenhouse title above Menu
 # =========================================================
 
 page = st.sidebar.radio(
@@ -809,7 +943,7 @@ if page == "Live Dashboard":
 
 
     # =====================================================
-    # REFRESH EVERY 1 MINUTE
+    # UPDATE EVERY 1 MINUTE
     # =====================================================
 
     @st.fragment(
@@ -866,7 +1000,9 @@ if page == "Live Dashboard":
             ]
 
 
-            if pd.notna(latest_time):
+            if pd.notna(
+                latest_time
+            ):
 
                 record_text = (
                     latest_time.strftime(
@@ -1122,6 +1258,7 @@ if page == "Live Dashboard":
             wifi_class = (
                 "status-card status-online"
             )
+
 
         else:
 
@@ -1523,7 +1660,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # STATUS FILTERS
+    # FILTERS
     # =====================================================
 
     filter_col1, filter_col2 = (
@@ -1688,7 +1825,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # SHORT HEADINGS
+    # SHORT TABLE HEADINGS
     # =====================================================
 
     table_df = table_df.rename(
@@ -1759,7 +1896,7 @@ elif page == "Historical Data":
 
 
     # =====================================================
-    # FULL WIDTH TABLE
+    # FULL WIDTH HISTORICAL TABLE
     # =====================================================
 
     table_html = (
@@ -1796,7 +1933,9 @@ elif page == "Historical Data":
 
 
     st.download_button(
-        label="Download Historical Data CSV",
+        label=(
+            "Download Historical Data CSV"
+        ),
         data=csv_data,
         file_name=(
             "smart_aquaponic_greenhouse_history.csv"

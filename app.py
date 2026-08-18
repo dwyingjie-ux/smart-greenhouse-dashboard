@@ -189,7 +189,7 @@ st.markdown(
 
 
     /* =====================================================
-       PHONE
+       PHONE LAYOUT
        ===================================================== */
 
     @media (max-width: 768px) {
@@ -221,8 +221,7 @@ st.markdown(
         }
 
         /*
-        Instead of Streamlit stacking every item vertically,
-        use two compact cards per row on phone.
+        Two cards per row on mobile.
         */
 
         .dashboard-grid,
@@ -266,26 +265,14 @@ st.markdown(
             font-size: 0.72rem;
         }
 
-        /*
-        Make Streamlit charts use more of the phone width.
-        */
-
         [data-testid="stVegaLiteChart"] {
             width: 100% !important;
         }
-
-        /*
-        Reduce divider spacing.
-        */
 
         hr {
             margin-top: 0.8rem !important;
             margin-bottom: 0.8rem !important;
         }
-
-        /*
-        Smaller expander/raw data text.
-        */
 
         [data-testid="stExpander"] {
             font-size: 0.7rem;
@@ -348,47 +335,28 @@ def get_container_client():
 
 def load_data():
 
-    container_client = (
-        get_container_client()
-    )
-
-
-    # =====================================================
-    # LIST BLOBS
-    # =====================================================
+    container_client = get_container_client()
 
     blobs = list(
         container_client.list_blobs()
     )
 
-
     if len(blobs) == 0:
-
         return pd.DataFrame()
 
 
-    # =====================================================
-    # NEWEST BLOBS FIRST
-    # =====================================================
-
+    # Newest blobs first
     blobs.sort(
         key=lambda blob: blob.last_modified,
         reverse=True
     )
 
 
-    # =====================================================
-    # READ RECENT BLOBS
-    # =====================================================
-
+    # Read recent blobs only
     recent_blobs = blobs[:20]
 
     records = []
 
-
-    # =====================================================
-    # READ BLOB DATA
-    # =====================================================
 
     for blob in recent_blobs:
 
@@ -399,7 +367,6 @@ def load_data():
                     blob.name
                 )
             )
-
 
             raw_data = (
                 blob_client
@@ -416,9 +383,7 @@ def load_data():
 
                 line = line.strip()
 
-
                 if not line:
-
                     continue
 
 
@@ -432,29 +397,17 @@ def load_data():
                         record
                     )
 
-
                 except json.JSONDecodeError:
-
                     pass
 
 
         except Exception:
-
             pass
 
 
-    # =====================================================
-    # NO DATA
-    # =====================================================
-
     if len(records) == 0:
-
         return pd.DataFrame()
 
-
-    # =====================================================
-    # CREATE DATAFRAME
-    # =====================================================
 
     df = pd.DataFrame(
         records
@@ -462,7 +415,7 @@ def load_data():
 
 
     # =====================================================
-    # TIMESTAMP
+    # SENSOR TIMESTAMP
     # =====================================================
 
     if "timestamp" in df.columns:
@@ -472,21 +425,14 @@ def load_data():
             errors="coerce"
         )
 
-
         df = df.dropna(
-            subset=[
-                "timestamp"
-            ]
+            subset=["timestamp"]
         )
-
 
         df = df.drop_duplicates(
-            subset=[
-                "timestamp"
-            ],
+            subset=["timestamp"],
             keep="last"
         )
-
 
         df = df.sort_values(
             "timestamp"
@@ -497,7 +443,7 @@ def load_data():
 
 
 # =========================================================
-# VALUE HELPERS
+# DISPLAY VALUE
 # =========================================================
 
 def display_value(
@@ -506,63 +452,46 @@ def display_value(
 ):
 
     if value is None:
-
         return "N/A"
-
 
     try:
 
-        if pd.isna(
-            value
-        ):
-
+        if pd.isna(value):
             return "N/A"
 
     except Exception:
-
         pass
 
 
-    return (
-        str(value)
-        + suffix
-    )
+    return str(value) + suffix
 
 
-def status_value(
-    value
-):
+# =========================================================
+# STATUS VALUE
+# =========================================================
+
+def status_value(value):
 
     if value is None:
-
         return "UNKNOWN"
-
 
     try:
 
-        if pd.isna(
-            value
-        ):
-
+        if pd.isna(value):
             return "UNKNOWN"
 
     except Exception:
-
         pass
 
 
-    return str(
-        value
-    ).upper()
+    return str(value).upper()
 
 
 # =========================================================
 # SAFE HTML
 # =========================================================
 
-def safe_text(
-    value
-):
+def safe_text(value):
 
     return html.escape(
         str(value)
@@ -580,7 +509,6 @@ def metric_card(
 ):
 
     status_html = ""
-
 
     if status is not None:
 
@@ -614,15 +542,12 @@ def metric_grid(
 ):
 
     if columns == 2:
-
         grid_class = "dashboard-grid-2"
 
     elif columns == 3:
-
         grid_class = "dashboard-grid-3"
 
     else:
-
         grid_class = "dashboard-grid"
 
 
@@ -634,7 +559,6 @@ def metric_grid(
 
 
     for card in cards:
-
         html_code += card
 
 
@@ -668,6 +592,8 @@ st.markdown(
 
 # =========================================================
 # LIVE DASHBOARD
+#
+# Checks Azure once every 1 minute.
 # =========================================================
 
 @st.fragment(
@@ -677,13 +603,12 @@ def live_dashboard():
 
 
     # =====================================================
-    # LOAD DATA
+    # LOAD AZURE DATA
     # =====================================================
 
     try:
 
         df = load_data()
-
 
     except Exception as e:
 
@@ -698,10 +623,6 @@ def live_dashboard():
         return
 
 
-    # =====================================================
-    # CHECK DATA
-    # =====================================================
-
     if df.empty:
 
         st.warning(
@@ -712,14 +633,14 @@ def live_dashboard():
 
 
     # =====================================================
-    # LATEST RECORD
+    # LATEST SENSOR RECORD
     # =====================================================
 
     latest = df.iloc[-1]
 
 
     # =====================================================
-    # LAST SENSOR RECORD
+    # SENSOR RECORD TIMESTAMP
     # =====================================================
 
     record_text = "Unknown"
@@ -731,10 +652,7 @@ def live_dashboard():
             "timestamp"
         ]
 
-
-        if pd.notna(
-            latest_time
-        ):
+        if pd.notna(latest_time):
 
             record_text = (
                 latest_time.strftime(
@@ -1033,7 +951,7 @@ def live_dashboard():
 
 
     # =====================================================
-    # GREENHOUSE TEMPERATURE
+    # GREENHOUSE TEMPERATURE HISTORY
     # =====================================================
 
     if (
@@ -1147,7 +1065,7 @@ def live_dashboard():
 
 
     # =====================================================
-    # RAW DATA
+    # RAW AZURE DATA
     # =====================================================
 
     st.divider()
@@ -1187,7 +1105,7 @@ def live_dashboard():
     )
 
     st.caption(
-        "Live dashboard refresh: every 60 seconds"
+        "Historical charts use the sensor record timestamp."
     )
 
 

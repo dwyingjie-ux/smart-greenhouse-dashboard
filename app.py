@@ -1,60 +1,103 @@
-def show_login():
+import streamlit as st
 
-    left, center, right = st.columns(
-        [1, 1.15, 1]
-    )
 
-    with center:
+# =========================================================
+# PAGE SETTINGS
+# =========================================================
 
-        with st.container(
-            border=True
+st.set_page_config(
+    page_title="Smart Aquaponic Greenhouse",
+    page_icon="🌱",
+    layout="centered"
+)
+
+
+# =========================================================
+# LOGIN DETAILS
+# =========================================================
+
+LOGIN_USERNAME = "admin"
+LOGIN_PASSWORD = "admin"
+
+
+# =========================================================
+# LOGIN SESSION
+# =========================================================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+
+# =========================================================
+# LOGIN PAGE
+# =========================================================
+
+if not st.session_state.logged_in:
+
+    st.title("🌱 Smart Aquaponic Greenhouse")
+
+    st.write("Please login to access the dashboard.")
+
+
+    with st.form("login_form"):
+
+        username = st.text_input(
+            "Username"
+        )
+
+        password = st.text_input(
+            "Password",
+            type="password"
+        )
+
+        login_button = st.form_submit_button(
+            "Login",
+            use_container_width=True
+        )
+
+
+    if login_button:
+
+        if (
+            username == LOGIN_USERNAME
+            and
+            password == LOGIN_PASSWORD
         ):
 
-            st.markdown(
-                """
-                <div class="login-title">
-                    Smart Aquaponic Greenhouse
-                </div>
+            st.session_state.logged_in = True
 
-                <div class="login-description">
-                    Sign in to access the monitoring dashboard
-                </div>
-                """,
-                unsafe_allow_html=True
+            st.rerun()
+
+        else:
+
+            st.error(
+                "Incorrect username or password."
             )
 
-            with st.form(
-                "login_form"
-            ):
 
-                username = st.text_input(
-                    "Username"
-                )
+# =========================================================
+# AFTER LOGIN
+# =========================================================
 
-                password = st.text_input(
-                    "Password",
-                    type="password"
-                )
+else:
 
-                login_button = st.form_submit_button(
-                    "Login",
-                    use_container_width=True
-                )
+    st.success(
+        "Login successful!"
+    )
 
-            if login_button:
+    st.title(
+        "Smart Aquaponic Greenhouse Dashboard"
+    )
 
-                if (
-                    username == LOGIN_USERNAME
-                    and
-                    password == LOGIN_PASSWORD
-                ):
+    st.write(
+        "Dashboard will appear here."
+    )
 
-                    st.session_state.logged_in = True
 
-                    st.rerun()
+    if st.button(
+        "Logout"
+    ):
 
-                else:
+        st.session_state.logged_in = False
 
-                    st.error(
-                        "Incorrect username or password."
-                    )
+        st.rerun()

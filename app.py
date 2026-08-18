@@ -434,7 +434,7 @@ st.markdown(
 # REFRESH SETTINGS
 # =========================================================
 
-REFRESH_SECONDS = 30
+REFRESH_SECONDS = 60
 
 
 # =========================================================
@@ -1480,7 +1480,7 @@ if page == "Live Dashboard":
     # =====================================================
 
     @st.fragment(
-        run_every="30s"
+        run_every="60s"
     )
     def live_dashboard():
 

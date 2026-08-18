@@ -671,7 +671,7 @@ st.markdown(
 # =========================================================
 
 @st.fragment(
-    run_every="10s"
+    run_every="60s"
 )
 def live_dashboard():
 
@@ -1187,7 +1187,7 @@ def live_dashboard():
     )
 
     st.caption(
-        "Live dashboard refresh: every 10 seconds"
+        "Live dashboard refresh: every 60 seconds"
     )
 
 

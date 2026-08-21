@@ -1224,9 +1224,6 @@ st.markdown(
 if page == "Live Dashboard":
 
 
-    @st.fragment(
-        run_every="30s"
-    )
     def live_dashboard():
 
 
@@ -1376,40 +1373,6 @@ if page == "Live Dashboard":
             ):
 
                 st.rerun()
-
-
-        components.html(
-            """
-            <div style="
-                width:100%;
-                text-align:right;
-                font-family:Arial;
-                font-size:13px;
-                color:#777;
-            ">
-                Next update in:
-                <b id="countdown">30s</b>
-            </div>
-
-            <script>
-                let secondsLeft = 30;
-                const element = document.getElementById("countdown");
-
-                const timer = setInterval(function() {
-                    secondsLeft -= 1;
-
-                    if (secondsLeft <= 0) {
-                        element.textContent = "Refreshing...";
-                        clearInterval(timer);
-                        return;
-                    }
-
-                    element.textContent = secondsLeft + "s";
-                }, 1000);
-            </script>
-            """,
-            height=28
-        )
 
 
         fish_status = sensor_status(

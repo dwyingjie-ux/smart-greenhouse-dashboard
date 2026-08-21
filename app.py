@@ -428,13 +428,13 @@ st.markdown(
 SENSOR_THRESHOLDS = {
 
     "fish_tank_level": {
-        "low": 30,
+        "low": 40,
         "high": 75
     },
 
     "fish_temperature": {
-        "low": 23,
-        "high": 28
+        "low": 18,
+        "high": 25
     },
 
     "ph": {
@@ -443,12 +443,12 @@ SENSOR_THRESHOLDS = {
     },
 
     "greenhouse_temperature": {
-        "low": 25,
+        "low": 20,
         "high": 35
     },
 
     "soil_moisture": {
-        "low": 30,
+        "low": 25,
         "high": 70
     },
 
@@ -912,6 +912,8 @@ def sensor_status(
 
     if sensor_name in [
         "fish_tank_level",
+        "fish_temperature",
+        "ph",
         "greenhouse_temperature"
     ]:
 

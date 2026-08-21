@@ -23,7 +23,8 @@ st.set_page_config(
 # ONLINE / OFFLINE SETTINGS
 # =========================================================
 
-DEVICE_TIMEOUT_SECONDS = 45
+DEVICE_TIMEOUT_SECONDS = 60
+FUTURE_TIMESTAMP_TOLERANCE_SECONDS = 30
 
 
 # =========================================================
@@ -348,7 +349,9 @@ st.markdown(
 
     .history-table-container {
         width: 100%;
+        max-height: 520px;
         overflow-x: auto;
+        overflow-y: auto;
         margin-top: 0.7rem;
         border: 1px solid rgba(128, 128, 128, 0.18);
         border-radius: 10px;
@@ -360,12 +363,15 @@ st.markdown(
     }
 
     .history-table th {
-        background-color: rgba(128, 128, 128, 0.08);
+        background-color: rgba(248, 249, 250, 0.98);
         font-weight: 700;
         font-size: 10px;
         padding: 8px 6px;
         text-align: center;
         white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 2;
     }
 
     .history-table td {
@@ -618,6 +624,20 @@ def prepare_dataframe(records):
             keep="last"
         )
 
+        # Ignore timestamps that are clearly in the future. This prevents
+        # old incorrectly shifted records from being treated as permanently LIVE.
+        now_utc = pd.Timestamp.now(tz="UTC")
+        future_limit = (
+            now_utc
+            + pd.Timedelta(
+                seconds=FUTURE_TIMESTAMP_TOLERANCE_SECONDS
+            )
+        )
+
+        df = df[
+            df["timestamp"] <= future_limit
+        ]
+
         df = df.sort_values(
             "timestamp"
         )
@@ -730,6 +750,11 @@ def get_device_status(latest_time):
         age_seconds = (
             now - last_update
         ).total_seconds()
+
+        # A future timestamp is not fresh telemetry. Treat it as OFFLINE
+        # instead of forcing the age to zero and leaving the dashboard ONLINE.
+        if age_seconds < -FUTURE_TIMESTAMP_TOLERANCE_SECONDS:
+            return "OFFLINE", None
 
         if age_seconds < 0:
             age_seconds = 0

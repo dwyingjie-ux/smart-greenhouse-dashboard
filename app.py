@@ -2125,3 +2125,4 @@ elif page == "Historical Data":
         "Historical data source: "
         "Azure Blob Storage - "
         + CONTAINER_NAME
+    )

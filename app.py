@@ -1224,9 +1224,6 @@ st.markdown(
 if page == "Live Dashboard":
 
 
-    @st.fragment(
-        run_every="30s"
-    )
     def live_dashboard():
 
 
@@ -1324,41 +1321,16 @@ if page == "Live Dashboard":
                 )
 
 
-        status_left, status_right = (
-            st.columns(
-                [
-                    4,
-                    1
-                ]
-            )
-        )
+        status_left, status_badge, status_refresh = st.columns([6, 1, 1])
 
 
-        with status_left:
-
-            st.markdown(
-                '<div class="last-record">'
-                'Last Sensor Record: '
-                + safe_text(record_text)
-                + '<br>'
-                'Last Update: '
-                + safe_text(
-                    format_data_age(
-                        data_age
-                    )
-                )
-                + '</div>',
-                unsafe_allow_html=True
-            )
-
-
-        with status_right:
+        with status_badge:
 
             if data_is_fresh:
 
                 st.markdown(
                     """
-                    <div style="text-align:right;">
+                    <div style="text-align:right; padding-top:6px;">
                         <span class="live-badge">
                             ● LIVE
                         </span>
@@ -1371,7 +1343,7 @@ if page == "Live Dashboard":
 
                 st.markdown(
                     """
-                    <div style="text-align:right;">
+                    <div style="text-align:right; padding-top:6px;">
                         <span class="offline-badge">
                             ● OFFLINE
                         </span>
@@ -1381,59 +1353,15 @@ if page == "Live Dashboard":
                 )
 
 
-        components.html(
-            """
-            <div style="
-                width:100%;
-                text-align:right;
-                font-family:Arial;
-                font-size:13px;
-                color:#777;
-            ">
-                Next update in:
-                <b id="countdown">30s</b>
-            </div>
+        with status_refresh:
 
-            <script>
+            if st.button(
+                "↻ Refresh",
+                use_container_width=True,
+                key="live_refresh"
+            ):
 
-                let secondsLeft = 30;
-
-                const element =
-                    document.getElementById(
-                        "countdown"
-                    );
-
-                const timer =
-                    setInterval(
-                        function() {
-
-                            secondsLeft -= 1;
-
-                            if (
-                                secondsLeft <= 0
-                            ) {
-
-                                element.textContent =
-                                    "Refreshing...";
-
-                                clearInterval(
-                                    timer
-                                );
-
-                                return;
-                            }
-
-                            element.textContent =
-                                secondsLeft + "s";
-
-                        },
-                        1000
-                    );
-
-            </script>
-            """,
-            height=28
-        )
+                st.rerun()
 
 
         fish_status = sensor_status(

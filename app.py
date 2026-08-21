@@ -2106,6 +2106,8 @@ elif page == "Historical Data":
         )
     )
 
+    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    
 
     st.download_button(
         "Download Historical Data CSV",

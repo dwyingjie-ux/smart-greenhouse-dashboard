@@ -1218,6 +1218,69 @@ st.markdown(
 
 
 # =========================================================
+# KEYBOARD REFRESH
+# =========================================================
+
+components.html(
+    """
+    <script>
+    const doc = window.parent.document;
+
+    if (!window.parent.rRefreshListenerAdded) {
+
+        window.parent.rRefreshListenerAdded = true;
+
+        doc.addEventListener("keydown", function(event) {
+
+            const activeElement = doc.activeElement;
+
+            const isTyping =
+                activeElement &&
+                (
+                    activeElement.tagName === "INPUT" ||
+                    activeElement.tagName === "TEXTAREA" ||
+                    activeElement.isContentEditable
+                );
+
+            if (isTyping) {
+                return;
+            }
+
+            if (
+                event.key === "r" ||
+                event.key === "R"
+            ) {
+
+                event.preventDefault();
+
+                const buttons =
+                    Array.from(
+                        doc.querySelectorAll("button")
+                    );
+
+                const refreshButton =
+                    buttons.find(
+                        button =>
+                            button.innerText.includes(
+                                "Refresh"
+                            )
+                    );
+
+                if (refreshButton) {
+                    refreshButton.click();
+                }
+            }
+
+        });
+
+    }
+    </script>
+    """,
+    height=0
+)
+
+
+# =========================================================
 # LIVE DASHBOARD
 # =========================================================
 

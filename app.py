@@ -605,8 +605,24 @@ def prepare_dataframe(records):
 
     if "timestamp" in df.columns:
 
+        # Stream Analytics already adds +8 hours:
+        # DATEADD(hour, 8, System.Timestamp())
+        #
+        # Azure still serializes the result with a trailing Z, for example:
+        # 2026-08-22T23:55:32.8660000Z
+        #
+        # The clock value 23:55 is already Singapore time, so remove the
+        # UTC marker before parsing and then attach Asia/Singapore.
+        timestamp_text = (
+            df["timestamp"]
+            .astype(str)
+            .str.strip()
+            .str.replace(r"Z$", "", regex=True)
+            .str.replace(r"\+00:00$", "", regex=True)
+        )
+
         df["timestamp"] = pd.to_datetime(
-            df["timestamp"],
+            timestamp_text,
             errors="coerce"
         )
 
@@ -616,26 +632,12 @@ def prepare_dataframe(records):
             ]
         )
 
-        # Azure Stream Analytics already adds +8 hours, so the stored
-        # timestamp represents Singapore local time. Attach the Singapore
-        # timezone without adding another 8 hours.
-        if df["timestamp"].dt.tz is None:
-
-            df["timestamp"] = (
-                df["timestamp"]
-                .dt.tz_localize(
-                    "Asia/Singapore"
-                )
+        df["timestamp"] = (
+            df["timestamp"]
+            .dt.tz_localize(
+                "Asia/Singapore"
             )
-
-        else:
-
-            df["timestamp"] = (
-                df["timestamp"]
-                .dt.tz_convert(
-                    "Asia/Singapore"
-                )
-            )
+        )
 
         df = df.drop_duplicates(
             subset=[

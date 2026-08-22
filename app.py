@@ -1405,7 +1405,14 @@ if page == "Live Dashboard":
                 )
 
 
-        status_spacer, status_badge, status_refresh = st.columns([6, 1, 1])
+        status_left, status_badge, status_refresh = st.columns([6, 1, 1])
+
+
+        with status_left:
+
+            st.caption(
+                "Last Sensor Record: " + record_text
+            )
 
 
         with status_badge:

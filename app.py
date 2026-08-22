@@ -603,59 +603,59 @@ def prepare_dataframe(records):
         ]
 
 
-    if "timestamp" in df.columns:
+        if "timestamp" in df.columns:
 
-    df["timestamp"] = pd.to_datetime(
-        df["timestamp"],
-        errors="coerce"
-    )
+        df["timestamp"] = pd.to_datetime(
+            df["timestamp"],
+            errors="coerce"
+        )
 
-    df = df.dropna(
-        subset=["timestamp"]
-    )
+        df = df.dropna(
+            subset=["timestamp"]
+        )
 
-    # Azure timestamp is already Singapore time (+8)
-    if df["timestamp"].dt.tz is None:
+        # Azure timestamp is already Singapore time (+8)
+        if df["timestamp"].dt.tz is None:
 
-        df["timestamp"] = (
-            df["timestamp"]
-            .dt.tz_localize(
-                "Asia/Singapore"
+            df["timestamp"] = (
+                df["timestamp"]
+                .dt.tz_localize(
+                    "Asia/Singapore"
+                )
+            )
+
+        else:
+
+            df["timestamp"] = (
+                df["timestamp"]
+                .dt.tz_convert(
+                    "Asia/Singapore"
+                )
+            )
+
+        df = df.drop_duplicates(
+            subset=["timestamp"],
+            keep="last"
+        )
+
+        now_sg = pd.Timestamp.now(
+            tz="Asia/Singapore"
+        )
+
+        future_limit = (
+            now_sg
+            + pd.Timedelta(
+                seconds=FUTURE_TIMESTAMP_TOLERANCE_SECONDS
             )
         )
 
-    else:
+        df = df[
+            df["timestamp"] <= future_limit
+        ]
 
-        df["timestamp"] = (
-            df["timestamp"]
-            .dt.tz_convert(
-                "Asia/Singapore"
-            )
+        df = df.sort_values(
+            "timestamp"
         )
-
-    df = df.drop_duplicates(
-        subset=["timestamp"],
-        keep="last"
-    )
-
-    now_sg = pd.Timestamp.now(
-        tz="Asia/Singapore"
-    )
-
-    future_limit = (
-        now_sg
-        + pd.Timedelta(
-            seconds=FUTURE_TIMESTAMP_TOLERANCE_SECONDS
-        )
-    )
-
-    df = df[
-        df["timestamp"] <= future_limit
-    ]
-
-    df = df.sort_values(
-        "timestamp"
-    )
 
     return df
 

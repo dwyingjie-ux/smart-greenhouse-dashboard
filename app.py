@@ -605,8 +605,30 @@ def prepare_dataframe(records):
 
     if "timestamp" in df.columns:
 
+        # Azure Stream Analytics already adds +8 hours:
+        # DATEADD(hour, 8, System.Timestamp())
+        #
+        # Azure may still write the value with a trailing "Z".
+        # In this project the clock value itself is already Singapore time,
+        # so remove the timezone marker first, then localize as Singapore.
+        timestamp_text = (
+            df["timestamp"]
+            .astype(str)
+            .str.strip()
+            .str.replace(
+                r"Z$",
+                "",
+                regex=True
+            )
+            .str.replace(
+                r"\+00:00$",
+                "",
+                regex=True
+            )
+        )
+
         df["timestamp"] = pd.to_datetime(
-            df["timestamp"],
+            timestamp_text,
             errors="coerce"
         )
 
@@ -616,26 +638,13 @@ def prepare_dataframe(records):
             ]
         )
 
-        # Azure Stream Analytics already adds +8 hours, so the stored
-        # timestamp represents Singapore local time. Attach the Singapore
-        # timezone without adding another 8 hours.
-        if df["timestamp"].dt.tz is None:
-
-            df["timestamp"] = (
-                df["timestamp"]
-                .dt.tz_localize(
-                    "Asia/Singapore"
-                )
+        # Attach Singapore timezone WITHOUT adding another 8 hours.
+        df["timestamp"] = (
+            df["timestamp"]
+            .dt.tz_localize(
+                "Asia/Singapore"
             )
-
-        else:
-
-            df["timestamp"] = (
-                df["timestamp"]
-                .dt.tz_convert(
-                    "Asia/Singapore"
-                )
-            )
+        )
 
         df = df.drop_duplicates(
             subset=[
@@ -644,6 +653,7 @@ def prepare_dataframe(records):
             keep="last"
         )
 
+        # Compare against Singapore current time.
         now_sg = pd.Timestamp.now(
             tz="Asia/Singapore"
         )
@@ -655,13 +665,16 @@ def prepare_dataframe(records):
             )
         )
 
+        # Only reject genuinely bad future timestamps.
         df = df[
             df["timestamp"] <= future_limit
         ]
 
+        # Oldest -> newest, so df.iloc[-1] is the latest record.
         df = df.sort_values(
             "timestamp"
         )
+
 
     return df
 
